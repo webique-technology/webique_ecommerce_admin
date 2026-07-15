@@ -20,7 +20,7 @@ const Header = ({ isOpen, toggleSidebar }) => {
     "/add-product": "Add Product",
 
     "/categories": "Categories",
-    "/add-categories": "Add Category",
+    "/categories/add": "Add Category",
     "/sub-categories": "Sub Categories",
 
     "/customers": "Customers",

@@ -13,13 +13,10 @@ import ForgetPassword from "../pages/authentication/ForgetPassword";
 // Dashboard
 import Dashboard from "../pages/dashboard/Dashboard";
 
-// Catalog
+// Modules
 import Products from "../pages/products/Products";
-import AddProduct from "../pages/products/AddProduct";
-
-import Catagories from "../pages/catagories/Catagories";
-import AddCatagories from "../pages/catagories/AddCatagories";
-import SubCategoryTable from "../pages/catagories/SubCategoryTable";
+import Categories from "../pages/categories/Categories";
+import CategoryForm from "../pages/categories/CategoryForm";
 
 // Sales
 import Orders from "../pages/Orders/Orders";
@@ -36,14 +33,23 @@ export default function AppRoutes() {
   return (
     <Routes>
 
-      {/* ==========================
-            Public Routes
-      ========================== */}
+      {/* ================= PUBLIC ================= */}
 
       <Route element={<PublicRoute />}>
-        <Route path="/super-admin/login" element={<Login />} />
-        <Route path="/store-admin/login" element={<Login />} />
-        <Route path="/forget-password" element={<ForgetPassword />} />
+        <Route
+          path="/super-admin/login"
+          element={<Login />}
+        />
+
+        <Route
+          path="/store-admin/login"
+          element={<Login />}
+        />
+
+        <Route
+          path="/forget-password"
+          element={<ForgetPassword />}
+        />
       </Route>
 
       <Route
@@ -51,108 +57,90 @@ export default function AppRoutes() {
         element={<Navigate to="/super-admin/login" replace />}
       />
 
-      {/* ==========================
-            Protected Routes
-      ========================== */}
+      {/* ================= PROTECTED ================= */}
 
       <Route element={<ProtectedRoute />}>
-
         <Route element={<MainLayout />}>
 
           {/* Dashboard */}
+
           <Route
             path="/dashboard"
             element={<Dashboard />}
           />
 
           {/* Products */}
+
           <Route
             path="/products/*"
             element={<Products />}
           />
 
-          <Route
-            path="/add-product"
-            element={<AddProduct />}
-          />
-
           {/* Orders */}
+
           <Route
             path="/orders"
             element={<Orders />}
           />
 
           <Route
-            path="/view-order/:id"
+            path="/orders/:id"
             element={<OrderDetails />}
           />
 
           {/* Customers */}
+
           <Route
             path="/customers"
             element={<Customers />}
           />
 
           {/* Reports */}
+
           <Route
             path="/analytics"
             element={<Analytics />}
           />
 
           {/* Settings */}
+
           <Route
             path="/settings"
             element={<Settings />}
           />
 
-          {/* ==========================
-                SUPER ADMIN ONLY
-          ========================== */}
+          {/* ========= SUPER ADMIN ========= */}
 
-          <Route
-            element={
-              <RoleRoute
-                roles={["super_admin"]}
-              />
-            }
-          >
+          <Route element={<RoleRoute roles={["super_admin"]} />}>
+
             <Route
               path="/categories/*"
-              element={<Catagories />}
+              element={<Categories />}
+            />
+            <Route
+              path="/categories/add"
+              element={<CategoryForm />}
             />
 
             <Route
-              path="/add-categories"
-              element={<AddCatagories />}
-            />
-            <Route
-              path="/sub-categories"
-              element={<SubCategoryTable />}
+              path="/categories/edit/:id"
+              element={<CategoryForm />}
             />
 
-            {/* Future */}
+            {/*
+              Future
 
-            {/* <Route
-              path="/attributes"
-              element={<Attributes />}
-            /> */}
+              <Route path="/attributes/*" element={<Attributes />} />
+              <Route path="/stores/*" element={<Stores />} />
+              <Route path="/store-admins/*" element={<StoreAdmins />} />
+            */}
 
-            {/* <Route
-              path="/stores"
-              element={<Stores />}
-            /> */}
-
-            {/* <Route
-              path="/store-admins"
-              element={<StoreAdmins />}
-            /> */}
           </Route>
 
         </Route>
-
       </Route>
 
-      {/* 404 */}
+      {/* ================= 404 ================= */}
 
       <Route
         path="*"

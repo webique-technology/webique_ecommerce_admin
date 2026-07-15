@@ -130,22 +130,22 @@ export const TextareaFields = ({
 
 
 const Button = ({
-  label,
-  onClick,
-  className = "",
-  type = "button",
-  disabled = false,
+    label,
+    onClick,
+    className = "",
+    type = "button",
+    disabled = false,
 }) => {
-  return (
-    <button
-      type={type}
-      onClick={onClick}
-      disabled={disabled}
-      className={`px-3 py-1 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition duration-200 ${className}`}
-    >
-      {label}
-    </button>
-  );
+    return (
+        <button
+            type={type}
+            onClick={onClick}
+            disabled={disabled}
+            className={`px-3 py-1 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition duration-200 ${className}`}
+        >
+            {label}
+        </button>
+    );
 };
 
 export default Button;
