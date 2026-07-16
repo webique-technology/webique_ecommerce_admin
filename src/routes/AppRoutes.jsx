@@ -17,6 +17,8 @@ import Dashboard from "../pages/dashboard/Dashboard";
 import Products from "../pages/products/Products";
 import Categories from "../pages/categories/Categories";
 import CategoryForm from "../pages/categories/CategoryForm";
+import Attributes from "../pages/categoryAttributes/Attributes";
+import AttributeForm from "../pages/categoryAttributes/AttributeForm";
 
 // Sales
 import Orders from "../pages/Orders/Orders";
@@ -125,6 +127,21 @@ export default function AppRoutes() {
             <Route
               path="/categories/edit/:id"
               element={<CategoryForm />}
+            />
+
+            <Route
+              path="/categories/:subcategoryId/attributes"
+              element={<Attributes />}
+            />
+
+            <Route
+              path="/categories/:subcategoryId/attributes/add"
+              element={<AttributeForm />}
+            />
+
+            <Route
+              path="/categories/:subcategoryId/attributes/edit/:id"
+              element={<AttributeForm />}
             />
 
             {/*

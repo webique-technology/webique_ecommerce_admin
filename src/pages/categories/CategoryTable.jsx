@@ -1,4 +1,8 @@
 import React, { useState } from "react";
+import Pagination from "../../components/common/Pagination";
+import StatusBadge from "../../components/common/StatusBadge";
+import StatusToggle from "../../components/common/StatusToggle";
+
 import {
     FiEdit2,
     FiTrash2,
@@ -20,6 +24,7 @@ export default function CategoryTable({
     onEdit,
     onDelete,
     onManage,
+    onStatusChange,
 }) {
     const [expanded, setExpanded] = useState({});
 
@@ -158,25 +163,26 @@ export default function CategoryTable({
                                         <td>
                                             {category.description}
                                         </td>
+                                        {/* <td className="px-6 py-4 text-center">
+                                            <StatusBadge status={category.status} />
+                                        </td> */}
+                                        <td className="px-6 py-4 text-center">
 
-                                        <td className="text-center">
+                                            <div className="flex items-center justify-center gap-3">
 
-                                            <span
-                                                className={`px-3 py-1 rounded-full text-xs
-                        ${category.status
-                                                        ? "bg-green-100 text-green-700"
-                                                        : "bg-red-100 text-red-700"
-                                                    }`}
-                                            >
-                                                {category.status
-                                                    ? "Active"
-                                                    : "Inactive"}
-                                            </span>
+                                                <StatusBadge status={category.status} />
+
+                                                <StatusToggle
+                                                    checked={category.status}
+                                                    onChange={() => onStatusChange(category.id)}
+                                                />
+
+                                            </div>
 
                                         </td>
 
                                         <td className="text-center">
-                                            {category.sort_order}
+                                            [ {category.sort_order} ]
                                         </td>
 
                                         <td>
@@ -235,21 +241,17 @@ export default function CategoryTable({
                                                 <td>
                                                     {child.description}
                                                 </td>
+                                                <td className="px-6 py-4 text-center">
+                                                    <div className="flex items-center justify-center gap-3">
 
-                                                <td className="text-center">
+                                                        <StatusBadge status={child.status} />
 
-                                                    <span
-                                                        className={`px-3 py-1 rounded-full text-xs
-                            ${child.status
-                                                                ? "bg-green-100 text-green-700"
-                                                                : "bg-red-100 text-red-700"
-                                                            }`}
-                                                    >
-                                                        {child.status
-                                                            ? "Active"
-                                                            : "Inactive"}
-                                                    </span>
+                                                        <StatusToggle
+                                                            checked={child.status}
+                                                            onChange={() => onStatusChange(child.id)}
+                                                        />
 
+                                                    </div>
                                                 </td>
 
                                                 <td className="text-center">
@@ -287,57 +289,13 @@ export default function CategoryTable({
 
             {/* Pagination */}
 
-            {!loading && pagination && (
-
-                <div className="flex justify-between items-center mt-6">
-
-                    <div className="text-gray-500">
-
-                        Total Categories :
-                        <b> {pagination.total}</b>
-
-                    </div>
-
-                    <div className="flex gap-2">
-
-                        <button
-                            disabled={pagination.current_page === 1}
-                            onClick={() =>
-                                onPageChange(
-                                    pagination.current_page - 1
-                                )
-                            }
-                            className="border rounded px-4 py-2 disabled:opacity-40"
-                        >
-                            Previous
-                        </button>
-
-                        <span className="px-4 py-2">
-
-                            {pagination.current_page} / {pagination.last_page}
-
-                        </span>
-
-                        <button
-                            disabled={
-                                pagination.current_page ===
-                                pagination.last_page
-                            }
-                            onClick={() =>
-                                onPageChange(
-                                    pagination.current_page + 1
-                                )
-                            }
-                            className="border rounded px-4 py-2 disabled:opacity-40"
-                        >
-                            Next
-                        </button>
-
-                    </div>
-
-                </div>
-
-            )}
+            <Pagination
+                currentPage={pagination.current_page}
+                totalPages={pagination.last_page}
+                totalItems={pagination.total}
+                perPage={pagination.per_page}
+                onPageChange={onPageChange}
+            />
 
         </div>
     );

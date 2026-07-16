@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import CategoryTable from "./CategoryTable";
+import DeleteModal from "../../components/common/DeleteModal";
 import {
   getCategories,
   deleteCategory,
+  changeCategoryStatus,
 } from "../../services/categoryService";
 
 export default function Categories() {
@@ -12,6 +14,12 @@ export default function Categories() {
 
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const [pagination, setPagination] = useState({
     current_page: 1,
@@ -63,22 +71,97 @@ export default function Categories() {
   // -----------------------------
   // Delete Category
   // -----------------------------
-  const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this category?"
-    );
+  // const handleDelete = async (id) => {
+  //   const confirmDelete = window.confirm(
+  //     "Are you sure you want to delete this category?"
+  //   );
 
-    if (!confirmDelete) return;
+  //   if (!confirmDelete) return;
 
+  //   try {
+  //     await deleteCategory(id);
+
+  //     refreshCategories();
+  //   } catch (error) {
+  //     console.error(error);
+  //     alert("Unable to delete category.");
+  //   }
+  // };
+
+  const handleDelete = (id) => {
+    setSelectedCategoryId(id);
+    setShowDeleteModal(true);
+  };
+  const confirmDelete = async () => {
     try {
-      await deleteCategory(id);
+      setDeleteLoading(true);
+
+      await deleteCategory(selectedCategoryId);
+
+      setShowDeleteModal(false);
+
+      setSelectedCategoryId(null);
 
       refreshCategories();
+
     } catch (error) {
+
       console.error(error);
+
       alert("Unable to delete category.");
+
+    } finally {
+
+      setDeleteLoading(false);
+
     }
   };
+
+  const handleStatusChange = async (id) => {
+    try {
+      await changeCategoryStatus(id);
+
+      setCategories((prev) =>
+        prev.map((category) => {
+          // Parent Category
+          if (category.id === id) {
+            return {
+              ...category,
+              status: !category.status,
+            };
+          }
+
+          // Subcategories
+          return {
+            ...category,
+            children: category.children.map((sub) =>
+              sub.id === id
+                ? {
+                  ...sub,
+                  status: !sub.status,
+                }
+                : sub
+            ),
+          };
+        })
+      );
+    } catch (error) {
+      console.error(error);
+      alert("Unable to change status.");
+    }
+  };
+
+  // const handleStatusChange = async (id) => {
+  //   try {
+  //     await changeCategoryStatus(id);
+
+  //     refreshCategories();
+
+  //   } catch (error) {
+  //     console.error(error);
+  //     alert("Unable to change status.");
+  //   }
+  // };
 
   // -----------------------------
   // Pagination
@@ -98,24 +181,40 @@ export default function Categories() {
     navigate(`/categories/edit/${id}`);
   };
 
-  const handleManageSubCategories = (categoryId) => {
-    navigate(`/categories/${categoryId}/sub-categories`);
+  const handleManageSubCategories = (subcategoryId) => {
+    // navigate(`/categories/${categoryId}/sub-categories`);
+    navigate(`/categories/${subcategoryId}/attributes`);
   };
 
   // -----------------------------
   // Render
   // -----------------------------
   return (
-    <CategoryTable
-      categories={categories}
-      loading={loading}
-      pagination={pagination}
-      onPageChange={handlePageChange}
-      onRefresh={refreshCategories}
-      onAdd={handleAdd}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
-      onManage={handleManageSubCategories}
-    />
+    <>
+      <CategoryTable
+        categories={categories}
+        loading={loading}
+        pagination={pagination}
+        onPageChange={handlePageChange}
+        onRefresh={refreshCategories}
+        onAdd={handleAdd}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onManage={handleManageSubCategories}
+        onStatusChange={handleStatusChange}
+      />
+
+      <DeleteModal
+        open={showDeleteModal}
+        title="Delete Category"
+        message="Are you sure you want to delete this category?"
+        loading={deleteLoading}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setSelectedCategoryId(null);
+        }}
+        onConfirm={confirmDelete}
+      />
+    </>
   );
 }

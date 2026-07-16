@@ -32,7 +32,7 @@ export default function CategoryForm() {
     description: "",
     image: null,
     status: true,
-    sort_order: 1,
+    sort_order: "",
 
     subcategories: [
       {
