@@ -33,3 +33,6 @@ export const deleteCategory = (id) => {
 export const changeCategoryStatus = (id) => {
     return API.patch(`${BASE_URL}/change-status/${id}`);
 };
+export const getCategoryTree = () => {
+    return API.get("/admin/tree");
+};
