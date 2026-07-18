@@ -7,9 +7,12 @@ import Button, { FormHeading } from "../../../components/ui/FormFields";
 import CategoryTreeSelector from "../../../components/common/CategoryTreeSelector";
 
 import { getCategoryTree } from "../../../services/categoryService";
+
 import {
     getAttributes,
+
     saveCategoryAttributes,
+
 } from "../../../services/productService";
 
 export default function Step2CategoryAttributes({
@@ -33,6 +36,7 @@ export default function Step2CategoryAttributes({
     const [loading, setLoading] = useState(false);
 
     const [treeLoading, setTreeLoading] = useState(true);
+    const [errors, setErrors] = useState({});
 
     const [attributeLoading, setAttributeLoading] = useState(false);
 
@@ -176,39 +180,17 @@ export default function Step2CategoryAttributes({
 
     const handleSubmit = async () => {
 
-        if (!selectedCategory) {
+        setLoading(true);
 
-            alert("Please select category.");
-
-            return;
-
-        }
+        setErrors({});
 
         try {
-
-            setLoading(true);
-
-            /*
-            Later
 
             await saveCategoryAttributes({
 
                 product_id: productId,
 
                 category_id: selectedCategory.id,
-
-                attribute_data: attributeData,
-
-            });
-
-            */
-
-            console.log({
-
-                product_id: productId,
-
-                category_id: selectedCategory.id,
-
                 attribute_data: attributeData,
 
             });
@@ -218,6 +200,18 @@ export default function Step2CategoryAttributes({
         }
 
         catch (error) {
+
+            if (error.response?.status === 422) {
+
+                setErrors(
+
+                    error.response.data.errors
+
+                );
+
+                return;
+
+            }
 
             console.error(error);
 
@@ -268,405 +262,406 @@ export default function Step2CategoryAttributes({
                     </div>
 
                 )}
+                <div className="flex gap-3 mb-6 w-full">
+                    {/* Category Tree */}
 
-                {/* Category Tree */}
+                    <CategoryTreeSelector
 
-                <CategoryTreeSelector
+                        tree={categoryTree}
 
-                    tree={categoryTree}
+                        selectedCategory={selectedCategory}
 
-                    selectedCategory={selectedCategory}
+                        onSelect={handleCategorySelect}
 
-                    onSelect={handleCategorySelect}
+                    />
 
-                />
+                    {/* Attributes */}
 
-                {/* Attributes */}
+                    <div className="mt-8 w-full">
 
-                <div className="mt-8">
+                        <h3 className="text-lg font-semibold text-slate-800 mb-5">
 
-                    <h3 className="text-lg font-semibold text-slate-800 mb-5">
+                            Product Attributes
 
-                        Product Attributes
+                        </h3>
 
-                    </h3>
+                        {
 
-                    {
+                            attributeLoading && (
 
-                        attributeLoading && (
+                                <div className="text-slate-500">
 
-                            <div className="text-slate-500">
+                                    Loading attributes...
 
-                                Loading attributes...
+                                </div>
 
-                            </div>
+                            )
 
-                        )
+                        }
 
-                    }
+                        {
 
-                    {
+                            !attributeLoading &&
 
-                        !attributeLoading &&
+                            selectedCategory &&
 
-                        selectedCategory &&
+                            attributes.length === 0 && (
 
-                        attributes.length === 0 && (
+                                <div className="rounded-lg border border-dashed border-slate-300 p-8 text-center text-slate-500">
 
-                            <div className="rounded-lg border border-dashed border-slate-300 p-8 text-center text-slate-500">
+                                    No Attributes Found
 
-                                No Attributes Found
+                                </div>
 
-                            </div>
+                            )
 
-                        )
+                        }
 
-                    }
+                        {
 
-                    {
+                            !attributeLoading &&
 
-                        !attributeLoading &&
+                            attributes.length > 0 && (
 
-                        attributes.length > 0 && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {
 
-                                {
+                                        attributes.map((attribute) => {
 
-                                    attributes.map((attribute) => {
+                                            switch (attribute.attribute_type) {
 
-                                        switch (attribute.attribute_type) {
+                                                /*
+                                                |--------------------------------------------------------------------------
+                                                | Dropdown
+                                                |--------------------------------------------------------------------------
+                                                */
 
-                                            /*
-                                            |--------------------------------------------------------------------------
-                                            | Dropdown
-                                            |--------------------------------------------------------------------------
-                                            */
+                                                case "dropdown":
 
-                                            case "dropdown":
+                                                    return (
 
-                                                return (
+                                                        <div key={attribute.id}>
 
-                                                    <div key={attribute.id}>
+                                                            <label className="block mb-2 font-medium">
 
-                                                        <label className="block mb-2 font-medium">
+                                                                {attribute.attribute_name}
 
-                                                            {attribute.attribute_name}
+                                                            </label>
 
-                                                        </label>
+                                                            <select
 
-                                                        <select
+                                                                className="w-full border rounded-lg px-4 py-3"
 
-                                                            className="w-full border rounded-lg px-4 py-3"
+                                                                value={
+                                                                    attributeData[
+                                                                    attribute.attribute_name
+                                                                    ] || ""
+                                                                }
 
-                                                            value={
-                                                                attributeData[
-                                                                attribute.attribute_name
-                                                                ] || ""
-                                                            }
+                                                                onChange={(e) =>
+                                                                    handleAttributeChange(
+                                                                        attribute.attribute_name,
+                                                                        e.target.value
+                                                                    )
+                                                                }
 
-                                                            onChange={(e) =>
-                                                                handleAttributeChange(
-                                                                    attribute.attribute_name,
-                                                                    e.target.value
-                                                                )
-                                                            }
+                                                            >
 
-                                                        >
+                                                                <option value="">
 
-                                                            <option value="">
+                                                                    Select
 
-                                                                Select
+                                                                </option>
 
-                                                            </option>
+                                                                {
 
-                                                            {
+                                                                    attribute.attribute_values.map((item) => (
 
-                                                                attribute.attribute_values.map((item) => (
+                                                                        <option
 
-                                                                    <option
+                                                                            key={item}
 
-                                                                        key={item}
+                                                                            value={item}
 
-                                                                        value={item}
+                                                                        >
 
-                                                                    >
+                                                                            {item}
 
-                                                                        {item}
+                                                                        </option>
 
-                                                                    </option>
+                                                                    ))
 
-                                                                ))
+                                                                }
 
-                                                            }
+                                                            </select>
 
-                                                        </select>
+                                                        </div>
 
-                                                    </div>
+                                                    );
 
-                                                );
+                                                /*
+                                                |--------------------------------------------------------------------------
+                                                | Text
+                                                |--------------------------------------------------------------------------
+                                                */
 
-                                            /*
-                                            |--------------------------------------------------------------------------
-                                            | Text
-                                            |--------------------------------------------------------------------------
-                                            */
+                                                case "text":
 
-                                            case "text":
+                                                    return (
 
-                                                return (
+                                                        <div key={attribute.id}>
 
-                                                    <div key={attribute.id}>
+                                                            <label className="block mb-2 font-medium">
 
-                                                        <label className="block mb-2 font-medium">
+                                                                {attribute.attribute_name}
 
-                                                            {attribute.attribute_name}
+                                                            </label>
 
-                                                        </label>
+                                                            <input
 
-                                                        <input
+                                                                type="text"
 
-                                                            type="text"
+                                                                className="w-full border rounded-lg px-4 py-3"
 
-                                                            className="w-full border rounded-lg px-4 py-3"
+                                                                value={
+                                                                    attributeData[
+                                                                    attribute.attribute_name
+                                                                    ] || ""
+                                                                }
 
-                                                            value={
-                                                                attributeData[
-                                                                attribute.attribute_name
-                                                                ] || ""
-                                                            }
+                                                                onChange={(e) =>
+                                                                    handleAttributeChange(
+                                                                        attribute.attribute_name,
+                                                                        e.target.value
+                                                                    )
+                                                                }
 
-                                                            onChange={(e) =>
-                                                                handleAttributeChange(
-                                                                    attribute.attribute_name,
-                                                                    e.target.value
-                                                                )
-                                                            }
+                                                            />
 
-                                                        />
+                                                        </div>
 
-                                                    </div>
+                                                    );
 
-                                                );
+                                                /*
+                                                |--------------------------------------------------------------------------
+                                                | Number
+                                                |--------------------------------------------------------------------------
+                                                */
 
-                                            /*
-                                            |--------------------------------------------------------------------------
-                                            | Number
-                                            |--------------------------------------------------------------------------
-                                            */
+                                                case "number":
 
-                                            case "number":
+                                                    return (
 
-                                                return (
+                                                        <div key={attribute.id}>
 
-                                                    <div key={attribute.id}>
+                                                            <label className="block mb-2 font-medium">
 
-                                                        <label className="block mb-2 font-medium">
+                                                                {attribute.attribute_name}
 
-                                                            {attribute.attribute_name}
+                                                            </label>
 
-                                                        </label>
+                                                            <input
 
-                                                        <input
+                                                                type="number"
 
-                                                            type="number"
+                                                                className="w-full border rounded-lg px-4 py-3"
 
-                                                            className="w-full border rounded-lg px-4 py-3"
+                                                                value={
+                                                                    attributeData[
+                                                                    attribute.attribute_name
+                                                                    ] || ""
+                                                                }
 
-                                                            value={
-                                                                attributeData[
-                                                                attribute.attribute_name
-                                                                ] || ""
-                                                            }
+                                                                onChange={(e) =>
+                                                                    handleAttributeChange(
+                                                                        attribute.attribute_name,
+                                                                        e.target.value
+                                                                    )
+                                                                }
 
-                                                            onChange={(e) =>
-                                                                handleAttributeChange(
-                                                                    attribute.attribute_name,
-                                                                    e.target.value
-                                                                )
-                                                            }
+                                                            />
 
-                                                        />
+                                                        </div>
 
-                                                    </div>
+                                                    );
+                                                /*
+    |--------------------------------------------------------------------------
+    | Boolean
+    |--------------------------------------------------------------------------
+    */
 
-                                                );
-                                            /*
-|--------------------------------------------------------------------------
-| Boolean
-|--------------------------------------------------------------------------
-*/
+                                                case "boolean":
 
-                                            case "boolean":
+                                                    return (
 
-                                                return (
+                                                        <div key={attribute.id}>
 
-                                                    <div key={attribute.id}>
+                                                            <label className="block mb-3 font-medium">
 
-                                                        <label className="block mb-3 font-medium">
+                                                                {attribute.attribute_name}
 
-                                                            {attribute.attribute_name}
+                                                            </label>
 
-                                                        </label>
+                                                            <select
+                                                                className="w-full border rounded-lg px-4 py-3"
+                                                                value={
+                                                                    attributeData[
+                                                                    attribute.attribute_name
+                                                                    ] ?? ""
+                                                                }
+                                                                onChange={(e) =>
+                                                                    handleAttributeChange(
+                                                                        attribute.attribute_name,
+                                                                        e.target.value
+                                                                    )
+                                                                }
+                                                            >
 
-                                                        <select
-                                                            className="w-full border rounded-lg px-4 py-3"
-                                                            value={
-                                                                attributeData[
-                                                                attribute.attribute_name
-                                                                ] ?? ""
-                                                            }
-                                                            onChange={(e) =>
-                                                                handleAttributeChange(
-                                                                    attribute.attribute_name,
-                                                                    e.target.value
-                                                                )
-                                                            }
-                                                        >
+                                                                <option value="">
+                                                                    Select
+                                                                </option>
 
-                                                            <option value="">
-                                                                Select
-                                                            </option>
+                                                                <option value="1">
+                                                                    Yes
+                                                                </option>
 
-                                                            <option value="1">
-                                                                Yes
-                                                            </option>
+                                                                <option value="0">
+                                                                    No
+                                                                </option>
 
-                                                            <option value="0">
-                                                                No
-                                                            </option>
+                                                            </select>
 
-                                                        </select>
+                                                        </div>
 
-                                                    </div>
+                                                    );
 
-                                                );
+                                                /*
+                                                |--------------------------------------------------------------------------
+                                                | Date
+                                                |--------------------------------------------------------------------------
+                                                */
 
-                                            /*
-                                            |--------------------------------------------------------------------------
-                                            | Date
-                                            |--------------------------------------------------------------------------
-                                            */
+                                                case "date":
 
-                                            case "date":
+                                                    return (
 
-                                                return (
+                                                        <div key={attribute.id}>
 
-                                                    <div key={attribute.id}>
+                                                            <label className="block mb-2 font-medium">
 
-                                                        <label className="block mb-2 font-medium">
+                                                                {attribute.attribute_name}
 
-                                                            {attribute.attribute_name}
+                                                            </label>
 
-                                                        </label>
+                                                            <input
 
-                                                        <input
+                                                                type="date"
 
-                                                            type="date"
+                                                                className="w-full border rounded-lg px-4 py-3"
 
-                                                            className="w-full border rounded-lg px-4 py-3"
+                                                                value={
+                                                                    attributeData[
+                                                                    attribute.attribute_name
+                                                                    ] || ""
+                                                                }
 
-                                                            value={
-                                                                attributeData[
-                                                                attribute.attribute_name
-                                                                ] || ""
-                                                            }
+                                                                onChange={(e) =>
+                                                                    handleAttributeChange(
+                                                                        attribute.attribute_name,
+                                                                        e.target.value
+                                                                    )
+                                                                }
 
-                                                            onChange={(e) =>
-                                                                handleAttributeChange(
-                                                                    attribute.attribute_name,
-                                                                    e.target.value
-                                                                )
-                                                            }
+                                                            />
 
-                                                        />
+                                                        </div>
 
-                                                    </div>
+                                                    );
 
-                                                );
+                                                /*
+                                                |--------------------------------------------------------------------------
+                                                | Color
+                                                |--------------------------------------------------------------------------
+                                                | Later this will become color chips.
+                                                |--------------------------------------------------------------------------
+                                                */
 
-                                            /*
-                                            |--------------------------------------------------------------------------
-                                            | Color
-                                            |--------------------------------------------------------------------------
-                                            | Later this will become color chips.
-                                            |--------------------------------------------------------------------------
-                                            */
+                                                case "color":
 
-                                            case "color":
+                                                    return (
 
-                                                return (
+                                                        <div key={attribute.id}>
 
-                                                    <div key={attribute.id}>
+                                                            <label className="block mb-2 font-medium">
 
-                                                        <label className="block mb-2 font-medium">
+                                                                {attribute.attribute_name}
 
-                                                            {attribute.attribute_name}
+                                                            </label>
 
-                                                        </label>
+                                                            <select
 
-                                                        <select
+                                                                className="w-full border rounded-lg px-4 py-3"
 
-                                                            className="w-full border rounded-lg px-4 py-3"
+                                                                value={
+                                                                    attributeData[
+                                                                    attribute.attribute_name
+                                                                    ] || ""
+                                                                }
 
-                                                            value={
-                                                                attributeData[
-                                                                attribute.attribute_name
-                                                                ] || ""
-                                                            }
+                                                                onChange={(e) =>
+                                                                    handleAttributeChange(
+                                                                        attribute.attribute_name,
+                                                                        e.target.value
+                                                                    )
+                                                                }
 
-                                                            onChange={(e) =>
-                                                                handleAttributeChange(
-                                                                    attribute.attribute_name,
-                                                                    e.target.value
-                                                                )
-                                                            }
+                                                            >
 
-                                                        >
+                                                                <option value="">
 
-                                                            <option value="">
+                                                                    Select Color
 
-                                                                Select Color
+                                                                </option>
 
-                                                            </option>
+                                                                {
 
-                                                            {
+                                                                    attribute.attribute_values.map((item) => (
 
-                                                                attribute.attribute_values.map((item) => (
+                                                                        <option
+                                                                            key={item}
+                                                                            value={item}
+                                                                        >
+                                                                            {item}
+                                                                        </option>
 
-                                                                    <option
-                                                                        key={item}
-                                                                        value={item}
-                                                                    >
-                                                                        {item}
-                                                                    </option>
+                                                                    ))
 
-                                                                ))
+                                                                }
 
-                                                            }
+                                                            </select>
 
-                                                        </select>
+                                                        </div>
 
-                                                    </div>
+                                                    );
 
-                                                );
+                                                default:
 
-                                            default:
+                                                    return null;
 
-                                                return null;
+                                            }
 
-                                        }
+                                        })
 
-                                    })
+                                    }
 
-                                }
+                                </div>
 
-                            </div>
+                            )
 
-                        )
+                        }
 
-                    }
-
+                    </div>
                 </div>
 
             </div>

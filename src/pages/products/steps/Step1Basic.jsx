@@ -8,18 +8,15 @@ import Button, {
     SelectField,
 } from "../../../components/ui/FormFields";
 
+import { createProduct } from "../../../services/productService";
+
 export default function Step1Basic({
 
     isEdit,
-
     productId,
-
     setProductId,
-
     productType,
-
     setProductType,
-
     nextStep,
 
 }) {
@@ -27,6 +24,7 @@ export default function Step1Basic({
     const navigate = useNavigate();
 
     const [loading, setLoading] = useState(false);
+    const [errors, setErrors] = useState({});
 
     const [formData, setFormData] = useState({
 
@@ -60,27 +58,69 @@ export default function Step1Basic({
 
         setLoading(true);
 
+        setErrors({});
+
         try {
 
-            console.log(formData);
+            const response = await createProduct(formData);
 
             /*
-                Later
-
-                POST /product/store
-
-                setProductId(response.data.id);
-
-                setProductType(response.data.product_type);
+            |--------------------------------------------------------------------------
+            | Save Product ID
+            |--------------------------------------------------------------------------
             */
 
-            setProductType(formData.product_type);
+            setProductId(response.data.data.id);
+            /*
+            |--------------------------------------------------------------------------
+            | Save Product Type
+            |--------------------------------------------------------------------------
+            */
+
+            setProductType(response.data.data.product_type);
+            /*
+            |--------------------------------------------------------------------------
+            | Next Step
+            |--------------------------------------------------------------------------
+            */
 
             nextStep();
 
-        }
+        } catch (error) {
 
-        finally {
+            /*
+            |--------------------------------------------------------------------------
+            | Laravel Validation
+            |--------------------------------------------------------------------------
+            */
+
+            if (error.response?.status === 422) {
+
+                setErrors(
+                    error.response.data.errors
+                );
+
+                return;
+
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Other Errors
+            |--------------------------------------------------------------------------
+            */
+
+            console.error(error);
+
+            alert(
+
+                error.response?.data?.message ||
+
+                "Something went wrong."
+
+            );
+
+        } finally {
 
             setLoading(false);
 
@@ -108,6 +148,8 @@ export default function Step1Basic({
                         placeholder="Enter Product Name"
                         labelClass="block mb-2 font-medium"
                         inputClass="w-full border rounded-lg px-4 py-3"
+                        error={errors.name?.[0]}
+                        errorClass="text-red-500 text-sm mt-1 block"
                     />
 
                     <SelectField
@@ -128,6 +170,8 @@ export default function Step1Basic({
                         placeholder="Select Product Type"
                         labelClass="block mb-2 font-medium"
                         selectClass="w-full border rounded-lg px-4 py-3"
+                        error={errors.product_type?.[0]}
+                        errorClass="text-red-500 text-sm mt-1 block"
                     />
 
                 </div>
@@ -139,9 +183,11 @@ export default function Step1Basic({
                         name="brand"
                         value={formData.brand}
                         onChange={handleChange}
-                        placeholder="Enter Brand Name"
+                        placeholder="Brand Name"
                         labelClass="block mb-2 font-medium"
                         inputClass="w-full border rounded-lg px-4 py-3"
+                        error={errors.brand?.[0]}
+                        errorClass="text-red-500 text-sm mt-1 block"
                     />
 
                     <InputFields
@@ -149,9 +195,11 @@ export default function Step1Basic({
                         name="sku"
                         value={formData.sku}
                         onChange={handleChange}
-                        placeholder="Enter SKU"
+                        placeholder="Product SKU"
                         labelClass="block mb-2 font-medium"
                         inputClass="w-full border rounded-lg px-4 py-3"
+                        error={errors.sku?.[0]}
+                        errorClass="text-red-500 text-sm mt-1 block"
                     />
 
                 </div>
@@ -160,13 +208,15 @@ export default function Step1Basic({
 
                     <TextareaFields
                         label="Short Description"
-                        name="short_description"
                         rows={3}
+                        name="short_description"
                         value={formData.short_description}
                         onChange={handleChange}
                         placeholder="Short Description"
                         labelClass="block mb-2 font-medium"
                         textareaClass="w-full border rounded-lg px-4 py-3"
+                        error={errors.short_description?.[0]}
+                        errorClass="text-red-500 text-sm mt-1 block"
                     />
 
                 </div>
@@ -175,13 +225,15 @@ export default function Step1Basic({
 
                     <TextareaFields
                         label="Description"
-                        name="description"
                         rows={6}
+                        name="description"
                         value={formData.description}
                         onChange={handleChange}
-                        placeholder="Full Product Description"
+                        placeholder="Full Description"
                         labelClass="block mb-2 font-medium"
                         textareaClass="w-full border rounded-lg px-4 py-3"
+                        error={errors.description?.[0]}
+                        errorClass="text-red-500 text-sm mt-1 block"
                     />
 
                 </div>

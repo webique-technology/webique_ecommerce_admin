@@ -20,7 +20,7 @@ export default function CategoryTreeSelector({
 
     return (
 
-        <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
+        <div className="border border-slate-200 rounded-xl w-full overflow-hidden bg-white">
 
             <div className="px-4 py-3 border-b bg-slate-50">
 

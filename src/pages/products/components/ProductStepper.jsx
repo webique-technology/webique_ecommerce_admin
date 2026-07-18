@@ -27,7 +27,7 @@ export default function ProductStepper({
 
     return (
 
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200  px-6 py-2">
 
             <div className="flex items-center justify-between">
 
@@ -48,8 +48,8 @@ export default function ProductStepper({
 
                                 <div
                                     className={`
-                                        w-10
-                                        h-10
+                                        w-8
+                                        h-8
                                         rounded-full
                                         flex
                                         items-center
@@ -77,7 +77,7 @@ export default function ProductStepper({
 
                                 <p
                                     className={`
-                                        mt-3
+                                        mt-1
                                         text-sm
                                         text-center
                                         font-medium

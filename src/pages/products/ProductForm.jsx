@@ -35,7 +35,7 @@ export default function ProductForm() {
 
   return (
 
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
 
       <ProductStepper
         currentStep={step}
@@ -75,33 +75,39 @@ export default function ProductForm() {
 
       )}
 
-      {step === 3 && productType === "simple" && (
-
+      {(step === 3) && (productType === "simple") ? (
         <Step3SimpleProduct
-
           productId={productId}
-
-          nextStep={nextStep}
-
-          previousStep={previousStep}
-
+          previousStep={() => setStep(2)}
+          nextStep={() => setStep(4)}
         />
+      ) : (
+        (step === 3) && (
+          <Step3VariableProduct
+            productId={productId}
+            previousStep={() => setStep(2)}
+            nextStep={() => setStep(4)}
+          />
+        )
+      )}
 
+      {/* {step === 3 && productType === "simple" && (
+        <Step3SimpleProduct
+          productId={productId}
+          nextStep={nextStep}
+          previousStep={previousStep}
+        />
       )}
 
       {step === 3 && productType === "variable" && (
-
         <Step3VariableProduct
-
           productId={productId}
-
           nextStep={nextStep}
-
           previousStep={previousStep}
-
         />
+      )} */}
 
-      )}
+
 
       {step === 4 && (
 
