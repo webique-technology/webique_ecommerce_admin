@@ -8,6 +8,7 @@ import Step2CategoryAttributes from "./steps/Step2CategoryAttributes";
 import Step3SimpleProduct from "./steps/Step3SimpleProduct";
 import Step3VariableProduct from "./steps/Step3VariableProduct";
 import Step4PublishSeo from "./steps/Step4PublishSeo";
+import { useEffect } from "react";
 
 export default function ProductForm() {
 
@@ -20,6 +21,7 @@ export default function ProductForm() {
   const [productId, setProductId] = useState(id || null);
 
   const [productType, setProductType] = useState("");
+  const [variantAttributes, setVariantAttributes] = useState([]);
 
   const nextStep = () => {
 
@@ -32,6 +34,11 @@ export default function ProductForm() {
     setStep((prev) => prev - 1);
 
   };
+  useEffect(() => {
+
+    console.log("Variant Attributes :", variantAttributes);
+
+  }, [variantAttributes]);
 
   return (
 
@@ -70,6 +77,7 @@ export default function ProductForm() {
           nextStep={nextStep}
 
           previousStep={previousStep}
+          setVariantAttributes={setVariantAttributes}
 
         />
 
@@ -85,6 +93,7 @@ export default function ProductForm() {
         (step === 3) && (
           <Step3VariableProduct
             productId={productId}
+            attributes={variantAttributes}
             previousStep={() => setStep(2)}
             nextStep={() => setStep(4)}
           />

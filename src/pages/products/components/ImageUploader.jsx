@@ -9,6 +9,7 @@ export default function ImageUploader({
     setPreview,
 
     setForm,
+    errors = {}
 
 }) {
 
@@ -170,6 +171,17 @@ export default function ImageUploader({
 
                 )
 
+            }
+            {
+                errors.thumbnail?.[0] && (
+
+                    <p className="text-red-500 text-sm mt-2">
+
+                        {errors.thumbnail[0]}
+
+                    </p>
+
+                )
             }
 
         </div>

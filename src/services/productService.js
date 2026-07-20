@@ -60,8 +60,19 @@ export const saveSimpleProduct = (data) => {
 |--------------------------------------------------------------------------
 */
 
+// export const saveVariableProduct = (data) => {
+//     return API.post(`${BASE_URL}/save-variable-product`, data);
+// };
 export const saveVariableProduct = (data) => {
-    return API.post(`${BASE_URL}/save-variable-product`, data);
+    return API.post(
+        `${BASE_URL}/save-variable-product`,
+        data,
+        {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        }
+    );
 };
 
 /*

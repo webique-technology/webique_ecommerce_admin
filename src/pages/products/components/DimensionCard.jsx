@@ -5,6 +5,7 @@ export default function DimensionCard({
     form,
 
     setForm,
+    errors = {},
 
 }) {
 
@@ -51,6 +52,8 @@ export default function DimensionCard({
                     labelClass="block mb-2 font-medium"
 
                     inputClass="w-full border rounded-lg px-4 py-3"
+                    error={errors.weight?.[0]}
+                    errorClass="text-red-500 text-sm mt-1 block"
 
                 />
 
@@ -71,6 +74,8 @@ export default function DimensionCard({
                     labelClass="block mb-2 font-medium"
 
                     inputClass="w-full border rounded-lg px-4 py-3"
+                    error={errors.length?.[0]}
+                    errorClass="text-red-500 text-sm mt-1 block"
 
                 />
 
@@ -91,6 +96,8 @@ export default function DimensionCard({
                     labelClass="block mb-2 font-medium"
 
                     inputClass="w-full border rounded-lg px-4 py-3"
+                    error={errors.width?.[0]}
+                    errorClass="text-red-500 text-sm mt-1 block"
 
                 />
 
@@ -111,6 +118,8 @@ export default function DimensionCard({
                     labelClass="block mb-2 font-medium"
 
                     inputClass="w-full border rounded-lg px-4 py-3"
+                    error={errors.height?.[0]}
+                    errorClass="text-red-500 text-sm mt-1 block"
 
                 />
 

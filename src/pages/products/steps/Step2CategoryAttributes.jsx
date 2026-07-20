@@ -22,6 +22,7 @@ export default function Step2CategoryAttributes({
     previousStep,
 
     nextStep,
+    setVariantAttributes,
 
 }) {
 
@@ -59,6 +60,9 @@ export default function Step2CategoryAttributes({
     const [attributes, setAttributes] = useState([]);
 
     const [attributeData, setAttributeData] = useState({});
+    // const [variantAttributes, setVariantAttributes] = useState({});
+    // Local checkbox selections
+    const [selectedVariantValues, setSelectedVariantValues] = useState({});
 
     /*
     |--------------------------------------------------------------------------
@@ -173,6 +177,64 @@ export default function Step2CategoryAttributes({
     };
 
     /*
+|--------------------------------------------------------------------------
+| Checkbox Attribute
+|--------------------------------------------------------------------------
+*/
+
+    const handleCheckboxAttribute = (
+
+        attributeName,
+
+        value,
+
+        checked
+
+    ) => {
+
+        setSelectedVariantValues((prev) => {
+
+            const selected = prev[attributeName] || [];
+
+            const updated = checked
+                ? [...selected, value]
+                : selected.filter((item) => item !== value);
+
+            return {
+
+                ...prev,
+
+                [attributeName]: updated,
+
+            };
+
+        });
+
+    };
+
+    const handleVariantAttributeChange = (
+        attributeName,
+        value,
+        checked
+    ) => {
+
+        setSelectedVariantValues(prev => {
+
+            const selected = prev[attributeName] || [];
+
+            const updated = checked
+                ? [...selected, value]
+                : selected.filter(item => item !== value);
+
+            return {
+                ...prev,
+                [attributeName]: updated,
+            };
+
+        });
+
+    };
+    /*
     |--------------------------------------------------------------------------
     | Save Step
     |--------------------------------------------------------------------------
@@ -186,14 +248,56 @@ export default function Step2CategoryAttributes({
 
         try {
 
+            if (!selectedCategory) {
+
+                setErrors({
+                    category: ["Please select a category."]
+                });
+
+                return;
+
+            }
+
             await saveCategoryAttributes({
 
                 product_id: productId,
 
                 category_id: selectedCategory.id,
+
                 attribute_data: attributeData,
 
             });
+
+            /*
+            |--------------------------------------------------------------------------
+            | Prepare Variant Attributes
+            |--------------------------------------------------------------------------
+            */
+
+            const variantList = attributes
+                .filter(attribute =>
+                    attribute.attribute_type === "checkbox" ||
+                    attribute.attribute_type === "color"
+                )
+                .map(attribute => ({
+
+                    attribute_name: attribute.attribute_name,
+
+                    values:
+                        selectedVariantValues[
+                        attribute.attribute_name
+                        ] || [],
+
+                }))
+                .filter(attribute => attribute.values.length > 0);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Save Variant Attributes to Parent
+            |--------------------------------------------------------------------------
+            */
+
+            setVariantAttributes(variantList);
 
             nextStep();
 
@@ -203,11 +307,7 @@ export default function Step2CategoryAttributes({
 
             if (error.response?.status === 422) {
 
-                setErrors(
-
-                    error.response.data.errors
-
-                );
+                setErrors(error.response.data.errors);
 
                 return;
 
@@ -369,9 +469,7 @@ export default function Step2CategoryAttributes({
                                                             >
 
                                                                 <option value="">
-
                                                                     Select
-
                                                                 </option>
 
                                                                 {
@@ -379,11 +477,8 @@ export default function Step2CategoryAttributes({
                                                                     attribute.attribute_values.map((item) => (
 
                                                                         <option
-
                                                                             key={item}
-
                                                                             value={item}
-
                                                                         >
 
                                                                             {item}
@@ -395,6 +490,78 @@ export default function Step2CategoryAttributes({
                                                                 }
 
                                                             </select>
+
+                                                        </div>
+
+                                                    );
+
+                                                /*
+                                                |--------------------------------------------------------------------------
+                                                | Checkbox (Variant Attribute)
+                                                |--------------------------------------------------------------------------
+                                                */
+
+                                                case "checkbox":
+
+                                                    return (
+
+                                                        <div key={attribute.id}>
+
+                                                            <label className="block mb-3 font-medium">
+
+                                                                {attribute.attribute_name}
+
+                                                            </label>
+
+                                                            <div className="space-y-2">
+
+                                                                {
+
+                                                                    attribute.attribute_values.map((item) => (
+
+                                                                        <label
+
+                                                                            key={item}
+
+                                                                            className="flex items-center gap-3 cursor-pointer"
+
+                                                                        >
+
+                                                                            <input
+
+                                                                                type="checkbox"
+
+                                                                                checked={
+                                                                                    selectedVariantValues[
+                                                                                        attribute.attribute_name
+                                                                                    ]?.includes(item) || false
+                                                                                }
+
+                                                                                onChange={(e) =>
+                                                                                    handleVariantAttributeChange(
+                                                                                        attribute.attribute_name,
+                                                                                        item,
+                                                                                        e.target.checked
+                                                                                    )
+                                                                                }
+
+                                                                                className="w-4 h-4"
+
+                                                                            />
+
+                                                                            <span>
+
+                                                                                {item}
+
+                                                                            </span>
+
+                                                                        </label>
+
+                                                                    ))
+
+                                                                }
+
+                                                            </div>
 
                                                         </div>
 
@@ -485,11 +652,12 @@ export default function Step2CategoryAttributes({
                                                         </div>
 
                                                     );
+
                                                 /*
-    |--------------------------------------------------------------------------
-    | Boolean
-    |--------------------------------------------------------------------------
-    */
+                                                |--------------------------------------------------------------------------
+                                                | Boolean
+                                                |--------------------------------------------------------------------------
+                                                */
 
                                                 case "boolean":
 
@@ -504,18 +672,22 @@ export default function Step2CategoryAttributes({
                                                             </label>
 
                                                             <select
+
                                                                 className="w-full border rounded-lg px-4 py-3"
+
                                                                 value={
                                                                     attributeData[
                                                                     attribute.attribute_name
                                                                     ] ?? ""
                                                                 }
+
                                                                 onChange={(e) =>
                                                                     handleAttributeChange(
                                                                         attribute.attribute_name,
                                                                         e.target.value
                                                                     )
                                                                 }
+
                                                             >
 
                                                                 <option value="">
@@ -583,8 +755,6 @@ export default function Step2CategoryAttributes({
                                                 |--------------------------------------------------------------------------
                                                 | Color
                                                 |--------------------------------------------------------------------------
-                                                | Later this will become color chips.
-                                                |--------------------------------------------------------------------------
                                                 */
 
                                                 case "color":
@@ -593,53 +763,82 @@ export default function Step2CategoryAttributes({
 
                                                         <div key={attribute.id}>
 
-                                                            <label className="block mb-2 font-medium">
+                                                            <label className="block mb-3 font-medium">
 
                                                                 {attribute.attribute_name}
 
                                                             </label>
 
-                                                            <select
-
-                                                                className="w-full border rounded-lg px-4 py-3"
-
-                                                                value={
-                                                                    attributeData[
-                                                                    attribute.attribute_name
-                                                                    ] || ""
-                                                                }
-
-                                                                onChange={(e) =>
-                                                                    handleAttributeChange(
-                                                                        attribute.attribute_name,
-                                                                        e.target.value
-                                                                    )
-                                                                }
-
-                                                            >
-
-                                                                <option value="">
-
-                                                                    Select Color
-
-                                                                </option>
+                                                            <div className="flex flex-wrap gap-3">
 
                                                                 {
 
-                                                                    attribute.attribute_values.map((item) => (
+                                                                    attribute.attribute_values.map((color) => {
 
-                                                                        <option
-                                                                            key={item}
-                                                                            value={item}
-                                                                        >
-                                                                            {item}
-                                                                        </option>
+                                                                        const selected =
+                                                                            selectedVariantValues[
+                                                                                attribute.attribute_name
+                                                                            ]?.includes(color);
 
-                                                                    ))
+                                                                        return (
+
+                                                                            <label
+                                                                                key={color}
+                                                                                className="cursor-pointer"
+                                                                            >
+
+                                                                                <input
+
+                                                                                    type="checkbox"
+
+                                                                                    className="hidden"
+
+                                                                                    checked={selected || false}
+
+                                                                                    onChange={(e) =>
+                                                                                        handleVariantAttributeChange(
+
+                                                                                            attribute.attribute_name,
+
+                                                                                            color,
+
+                                                                                            e.target.checked
+
+                                                                                        )
+                                                                                    }
+
+                                                                                />
+
+                                                                                <div
+
+                                                                                    className={`
+                                        w-10
+                                        h-10
+                                        rounded-full
+                                        border-4
+                                        transition
+                                        duration-200
+                                        ${selected
+                                                                                            ? "border-primary scale-110"
+                                                                                            : "border-slate-300"
+                                                                                        }
+                                    `}
+
+                                                                                    style={{
+                                                                                        backgroundColor: color.toLowerCase(),
+                                                                                    }}
+
+                                                                                />
+
+                                                                            </label>
+
+                                                                        );
+
+                                                                    })
 
                                                                 }
 
-                                                            </select>
+                                                            </div>
 
                                                         </div>
 

@@ -7,6 +7,7 @@ export default function GalleryUploader({
     setImages,
 
     setForm,
+    errors = {}
 
 }) {
 
@@ -186,6 +187,17 @@ export default function GalleryUploader({
 
                 )
 
+            }
+            {
+                errors.gallery_images?.[0] && (
+
+                    <p className="text-red-500 text-sm mt-2">
+
+                        {errors.gallery_images[0]}
+
+                    </p>
+
+                )
             }
 
         </div>

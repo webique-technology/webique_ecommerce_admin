@@ -7,6 +7,7 @@ import PricingInventoryCard from "../components/PricingInventoryCard";
 import DimensionCard from "../components/DimensionCard";
 import ImageUploader from "../components/ImageUploader";
 import GalleryUploader from "../components/GalleryUploader";
+import { saveSimpleProduct } from "../../../services/productService";
 
 export default function Step3SimpleProduct({
 
@@ -23,6 +24,7 @@ export default function Step3SimpleProduct({
     const navigate = useNavigate();
 
     const [loading, setLoading] = useState(false);
+    const [errors, setErrors] = useState({});
 
     /*
     |--------------------------------------------------------------------------
@@ -78,40 +80,35 @@ export default function Step3SimpleProduct({
     |--------------------------------------------------------------------------
     */
 
+    /*
+ |--------------------------------------------------------------------------
+ | Submit
+ |--------------------------------------------------------------------------
+ */
+
     const handleSubmit = async () => {
 
         try {
 
             setLoading(true);
 
-            /*
-            |--------------------------------------------------------------------------
-            | API
-            |--------------------------------------------------------------------------
-            |
-            | POST /product/save-simple-product
-            |
-            | product_id
-            | barcode
-            | price
-            | sale_price
-            | cost_price
-            | stock
-            | low_stock_alert
-            | tax_percentage
-            | weight
-            | length
-            | width
-            | height
-            | status
-            | thumbnail
-            | gallery_images[]
-            |
-            */
+            setErrors({});
 
             const payload = new FormData();
 
+            /*
+            |--------------------------------------------------------------------------
+            | Product
+            |--------------------------------------------------------------------------
+            */
+
             payload.append("product_id", productId);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Pricing
+            |--------------------------------------------------------------------------
+            */
 
             payload.append("barcode", form.barcode);
 
@@ -121,11 +118,29 @@ export default function Step3SimpleProduct({
 
             payload.append("cost_price", form.cost_price);
 
+            /*
+            |--------------------------------------------------------------------------
+            | Inventory
+            |--------------------------------------------------------------------------
+            */
+
             payload.append("stock", form.stock);
 
-            payload.append("low_stock_alert", form.low_stock_alert);
+            payload.append(
+                "low_stock_alert",
+                form.low_stock_alert
+            );
 
-            payload.append("tax_percentage", form.tax_percentage);
+            payload.append(
+                "tax_percentage",
+                form.tax_percentage
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | Dimensions
+            |--------------------------------------------------------------------------
+            */
 
             payload.append("weight", form.weight);
 
@@ -135,7 +150,22 @@ export default function Step3SimpleProduct({
 
             payload.append("height", form.height);
 
-            payload.append("status", form.status ? 1 : 0);
+            /*
+            |--------------------------------------------------------------------------
+            | Status
+            |--------------------------------------------------------------------------
+            */
+
+            payload.append(
+                "status",
+                form.status ? 1 : 0
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | Thumbnail
+            |--------------------------------------------------------------------------
+            */
 
             if (form.thumbnail) {
 
@@ -146,34 +176,68 @@ export default function Step3SimpleProduct({
 
             }
 
-            form.gallery_images.forEach(image => {
-
-                payload.append(
-                    "gallery_images[]",
-                    image
-                );
-
-            });
-
             /*
             |--------------------------------------------------------------------------
-            | Later
+            | Gallery Images
             |--------------------------------------------------------------------------
-            |
-            
-            await saveSimpleProduct(payload);
-            
             */
 
-            for (const pair of payload.entries()) {
+            if (form.gallery_images.length > 0) {
 
-                console.log(pair[0], pair[1]);
+                form.gallery_images.forEach((image) => {
+
+                    payload.append(
+                        "gallery_images[]",
+                        image
+                    );
+
+                });
 
             }
 
-            nextStep();
+            /*
+            |--------------------------------------------------------------------------
+            | API
+            |--------------------------------------------------------------------------
+            */
+
+            const response = await saveSimpleProduct(
+                payload
+            );
+
+            console.log(response.data);
 
             nextStep();
+
+        }
+
+        catch (error) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Laravel Validation
+            |--------------------------------------------------------------------------
+            */
+
+            if (error.response?.status === 422) {
+
+                setErrors(
+                    error.response.data.errors
+                );
+
+                return;
+
+            }
+
+            console.error(error);
+
+            alert(
+
+                error.response?.data?.message ||
+
+                "Something went wrong."
+
+            );
 
         }
 
@@ -193,47 +257,36 @@ export default function Step3SimpleProduct({
                 {/* Pricing & Inventory */}
 
                 <PricingInventoryCard
-
                     form={form}
-
                     setForm={setForm}
-
+                    errors={errors}
                 />
 
                 {/* Shipping Dimensions */}
 
                 <DimensionCard
-
                     form={form}
-
                     setForm={setForm}
-
+                    errors={errors}
                 />
 
                 {/* Thumbnail */}
 
                 <ImageUploader
-
                     thumbnail={form.thumbnail}
-
                     preview={thumbnailPreview}
-
                     setPreview={setThumbnailPreview}
-
                     setForm={setForm}
-
+                    errors={errors}
                 />
 
                 {/* Gallery */}
 
                 <GalleryUploader
-
                     images={galleryPreview}
-
                     setImages={setGalleryPreview}
-
                     setForm={setForm}
-
+                    errors={errors}
                 />
 
             </div>

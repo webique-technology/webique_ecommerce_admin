@@ -6,8 +6,8 @@ import {
 export default function PricingInventoryCard({
 
     form,
-
     setForm,
+    errors = {},
 
 }) {
 
@@ -52,6 +52,8 @@ export default function PricingInventoryCard({
                     labelClass="block mb-2 font-medium"
 
                     inputClass="w-full border rounded-lg px-4 py-3"
+                    error={errors.price?.[0]}
+                    errorClass="text-red-500 text-sm mt-1 block"
 
                 />
 
@@ -70,6 +72,8 @@ export default function PricingInventoryCard({
                     labelClass="block mb-2 font-medium"
 
                     inputClass="w-full border rounded-lg px-4 py-3"
+                    error={errors.sale_price?.[0]}
+                    errorClass="text-red-500 text-sm mt-1 block"
 
                 />
 
@@ -88,6 +92,8 @@ export default function PricingInventoryCard({
                     labelClass="block mb-2 font-medium"
 
                     inputClass="w-full border rounded-lg px-4 py-3"
+                    error={errors.cost_price?.[0]}
+                    errorClass="text-red-500 text-sm mt-1 block"
 
                 />
 
@@ -104,6 +110,8 @@ export default function PricingInventoryCard({
                     labelClass="block mb-2 font-medium"
 
                     inputClass="w-full border rounded-lg px-4 py-3"
+                    error={errors.barcode?.[0]}
+                    errorClass="text-red-500 text-sm mt-1 block"
 
                 />
 
@@ -122,6 +130,8 @@ export default function PricingInventoryCard({
                     labelClass="block mb-2 font-medium"
 
                     inputClass="w-full border rounded-lg px-4 py-3"
+                    error={errors.stock?.[0]}
+                    errorClass="text-red-500 text-sm mt-1 block"
 
                 />
 
@@ -140,6 +150,8 @@ export default function PricingInventoryCard({
                     labelClass="block mb-2 font-medium"
 
                     inputClass="w-full border rounded-lg px-4 py-3"
+                    error={errors.low_stock_alert?.[0]}
+                    errorClass="text-red-500 text-sm mt-1 block"
 
                 />
 
@@ -158,6 +170,8 @@ export default function PricingInventoryCard({
                     labelClass="block mb-2 font-medium"
 
                     inputClass="w-full border rounded-lg px-4 py-3"
+                    error={errors.tax_percentage?.[0]}
+                    errorClass="text-red-500 text-sm mt-1 block"
 
                 />
 

@@ -314,6 +314,10 @@ export default function AttributeForm() {
                                 label: "Dropdown",
                                 value: "dropdown",
                             },
+                            {
+                                label: "Checkbox",
+                                value: "checkbox",
+                            },
 
                             {
                                 label: "Color",
