@@ -1,26 +1,205 @@
+// import { useEffect, useState } from "react";
+// import { useNavigate } from "react-router-dom";
+
+// // import Button from "../../../components/common/Button";
+// import Button, { FormHeading } from "../../../components/ui/FormFields";
+
+// import CategoryTreeSelector from "../../../components/common/CategoryTreeSelector";
+
+// import { getCategoryTree } from "../../../services/categoryService";
+// import ProductAttributesRenderer from "../components/ProductAttributesRenderer";
+// import AddColorModal from "../components/AddColorModal";
+
+// import {
+//     getAttributes,
+//     getProduct,
+//     saveCategoryAttributes,
+//     updateCategoryAttributes,
+
+// } from "../../../services/productService";
+
+// export default function Step2CategoryAttributes({
+
+//     productId,
+
+//     previousStep,
+
+//     nextStep,
+//     setVariantAttributes,
+
+// }) {
+
+//     const navigate = useNavigate();
+
+//     /*
+//     |--------------------------------------------------------------------------
+//     | Loading
+//     |--------------------------------------------------------------------------
+//     */
+
+//     const [loading, setLoading] = useState(false);
+
+//     const [treeLoading, setTreeLoading] = useState(true);
+//     const [errors, setErrors] = useState({});
+
+//     const [attributeLoading, setAttributeLoading] = useState(false);
+
+//     /*
+//     |--------------------------------------------------------------------------
+//     | Category Tree
+//     |--------------------------------------------------------------------------
+//     */
+
+//     const [categoryTree, setCategoryTree] = useState([]);
+
+//     const [selectedCategory, setSelectedCategory] = useState(null);
+
+//     /*
+//     |--------------------------------------------------------------------------
+//     | Attributes
+//     |--------------------------------------------------------------------------
+//     */
+
+//     const [attributes, setAttributes] = useState([]);
+
+//     const [attributeData, setAttributeData] = useState({});
+//     const [showColorModal, setShowColorModal] = useState(false);
+//     const [activeColorAttribute, setActiveColorAttribute] = useState(null);
+
+//     // const [variantAttributes, setVariantAttributes] = useState({});
+//     // Local checkbox selections
+//     const [selectedVariantValues, setSelectedVariantValues] = useState({});
+
+//     /*
+//     |--------------------------------------------------------------------------
+//     | Load Category Tree
+//     |--------------------------------------------------------------------------
+//     */
+
+//     // useEffect(() => {
+
+//     //     fetchCategoryTree();
+
+//     // }, []);
+
+//     useEffect(() => {
+//         const initData = async () => {
+//             await fetchCategoryTree();
+//             if (productId) {
+//                 await fetchSavedProductCategoryData();
+//             }
+//         };
+
+//         initData();
+//     }, [productId]);
+
+//     const fetchCategoryTree = async () => {
+//         try {
+//             setTreeLoading(true);
+//             const response = await getCategoryTree();
+//             setCategoryTree(response.data.data || []);
+//         }
+//         catch (error) {
+//             console.error(error);
+//         }
+//         finally {
+//             setTreeLoading(false);
+//         }
+
+//     };
+
+//     const fetchSavedProductCategoryData = async () => {
+//         try {
+//             const response = await getProduct(productId);
+//             const product = response.data?.data || response.data;
+
+//             if (product?.category || product?.category_id) {
+//                 const category = product.category || {
+//                     id: product.category_id,
+//                     full_path: product.category_name || "Selected Category",
+//                 };
+
+//                 setSelectedCategory(category);
+
+//                 // Fetch Category Attributes
+//                 if (category.id) {
+//                     await fetchAttributes(category.id);
+//                 }
+
+//                 // Populate Attribute Data
+//                 if (product.attribute_data) {
+//                     setAttributeData(product.attribute_data);
+//                 }
+
+//                 // Populate Variant Values if existing
+//                 if (product.selected_variant_values) {
+//                     setSelectedVariantValues(product.selected_variant_values);
+//                 }
+//             }
+//         } catch (error) {
+//             console.error("Failed to fetch product category details:", error);
+//         }
+//     };
+
+//     /*
+//     |--------------------------------------------------------------------------
+//     | Select Category
+//     |--------------------------------------------------------------------------
+//     */
+
+//     const handleCategorySelect = (category) => {
+
+//         setSelectedCategory(category);
+//         setAttributeData({});
+//         setSelectedVariantValues({});
+//         fetchAttributes(category.id);
+
+//     };
+
+//     /*
+//     |--------------------------------------------------------------------------
+//     | Load Attributes
+//     |--------------------------------------------------------------------------
+//     */
+
+//     const fetchAttributes = async (categoryId) => {
+//         try {
+//             setAttributeLoading(true);
+//             const response = await getAttributes(categoryId);
+//             // setAttributes(response.data.data.data || [] );
+//             setAttributes(response.data.data.data || response.data.data || []);
+//         }
+//         catch (error) {
+//             console.error(error);
+//         }
+//         finally {
+//             setAttributeLoading(false);
+//         }
+//     };
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-// import Button from "../../../components/common/Button";
 import Button, { FormHeading } from "../../../components/ui/FormFields";
 
 import CategoryTreeSelector from "../../../components/common/CategoryTreeSelector";
+
+import ProductAttributesRenderer from "../components/ProductAttributesRenderer";
+import AddColorModal from "../components/AddColorModal";
 
 import { getCategoryTree } from "../../../services/categoryService";
 
 import {
     getAttributes,
-
+    getProduct,
     saveCategoryAttributes,
-
+    updateCategoryAttributes,
 } from "../../../services/productService";
 
 export default function Step2CategoryAttributes({
 
     productId,
-
     previousStep,
-
     nextStep,
     setVariantAttributes,
 
@@ -35,20 +214,18 @@ export default function Step2CategoryAttributes({
     */
 
     const [loading, setLoading] = useState(false);
-
     const [treeLoading, setTreeLoading] = useState(true);
-    const [errors, setErrors] = useState({});
-
     const [attributeLoading, setAttributeLoading] = useState(false);
+
+    const [errors, setErrors] = useState({});
 
     /*
     |--------------------------------------------------------------------------
-    | Category Tree
+    | Category
     |--------------------------------------------------------------------------
     */
 
     const [categoryTree, setCategoryTree] = useState([]);
-
     const [selectedCategory, setSelectedCategory] = useState(null);
 
     /*
@@ -60,21 +237,47 @@ export default function Step2CategoryAttributes({
     const [attributes, setAttributes] = useState([]);
 
     const [attributeData, setAttributeData] = useState({});
-    // const [variantAttributes, setVariantAttributes] = useState({});
-    // Local checkbox selections
+
     const [selectedVariantValues, setSelectedVariantValues] = useState({});
 
     /*
     |--------------------------------------------------------------------------
-    | Load Category Tree
+    | Color Modal
+    |--------------------------------------------------------------------------
+    */
+
+    const [showColorModal, setShowColorModal] = useState(false);
+    const [activeColorAttribute, setActiveColorAttribute] = useState(null);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Initial Load
     |--------------------------------------------------------------------------
     */
 
     useEffect(() => {
 
-        fetchCategoryTree();
+        const init = async () => {
 
-    }, []);
+            await fetchCategoryTree();
+
+            if (productId) {
+
+                await fetchSavedProductCategoryData();
+
+            }
+
+        };
+
+        init();
+
+    }, [productId]);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Category Tree
+    |--------------------------------------------------------------------------
+    */
 
     const fetchCategoryTree = async () => {
 
@@ -104,6 +307,90 @@ export default function Step2CategoryAttributes({
 
     /*
     |--------------------------------------------------------------------------
+    | Edit Product
+    |--------------------------------------------------------------------------
+    */
+
+    const fetchSavedProductCategoryData = async () => {
+
+        try {
+
+            const response = await getProduct(productId);
+
+            const product = response.data?.data || response.data;
+
+            if (!product) return;
+
+            const category = product.category || {
+
+                id: product.category_id,
+
+                full_path:
+
+                    product.category_name ||
+
+                    "Selected Category",
+
+            };
+
+            setSelectedCategory(category);
+
+            if (category.id) {
+
+                await fetchAttributes(category.id);
+
+            }
+
+            if (product.attribute_data) {
+
+                setAttributeData(product.attribute_data);
+
+                const variantSelections = {};
+
+                Object.entries(product.attribute_data).forEach(
+
+                    ([key, value]) => {
+
+                        if (Array.isArray(value)) {
+
+                            variantSelections[key] = value;
+
+                        }
+
+                    }
+
+                );
+
+                setSelectedVariantValues(
+
+                    variantSelections
+
+                );
+
+            }
+
+            if (product.selected_variant_values) {
+
+                setSelectedVariantValues(
+
+                    product.selected_variant_values
+
+                );
+
+            }
+
+        }
+
+        catch (error) {
+
+            console.error(error);
+
+        }
+
+    };
+
+    /*
+    |--------------------------------------------------------------------------
     | Select Category
     |--------------------------------------------------------------------------
     */
@@ -114,13 +401,15 @@ export default function Step2CategoryAttributes({
 
         setAttributeData({});
 
+        setSelectedVariantValues({});
+
         fetchAttributes(category.id);
 
     };
 
     /*
     |--------------------------------------------------------------------------
-    | Load Attributes
+    | Load Category Attributes
     |--------------------------------------------------------------------------
     */
 
@@ -132,9 +421,15 @@ export default function Step2CategoryAttributes({
 
             const response = await getAttributes(categoryId);
 
-            setAttributes(
-                response.data.data.data || []
-            );
+            const loadedAttributes =
+
+                response.data.data.data ||
+
+                response.data.data ||
+
+                [];
+
+            setAttributes(loadedAttributes);
 
         }
 
@@ -153,18 +448,12 @@ export default function Step2CategoryAttributes({
     };
 
     /*
-    |--------------------------------------------------------------------------
-    | Attribute Change
-    |--------------------------------------------------------------------------
-    */
+|--------------------------------------------------------------------------
+| Attribute Change
+|--------------------------------------------------------------------------
+*/
 
-    const handleAttributeChange = (
-
-        attributeName,
-
-        value
-
-    ) => {
+    const handleAttributeChange = (attributeName, value) => {
 
         setAttributeData((prev) => ({
 
@@ -177,12 +466,97 @@ export default function Step2CategoryAttributes({
     };
 
     /*
-|--------------------------------------------------------------------------
-| Checkbox Attribute
-|--------------------------------------------------------------------------
-*/
+    |--------------------------------------------------------------------------
+    | Add Custom Color
+    |--------------------------------------------------------------------------
+    */
 
-    const handleCheckboxAttribute = (
+    const handleAddColor = (color) => {
+
+        if (!activeColorAttribute) return;
+
+        setAttributeData((prev) => {
+
+            const existing =
+
+                prev[activeColorAttribute] || [];
+
+            // Prevent duplicate color names
+            const alreadyExists = existing.some(
+
+                (item) =>
+
+                    item.name.toLowerCase() ===
+
+                    color.name.toLowerCase()
+
+            );
+
+            if (alreadyExists) {
+
+                return prev;
+
+            }
+
+            return {
+
+                ...prev,
+
+                [activeColorAttribute]: [
+
+                    ...existing,
+
+                    color,
+
+                ],
+
+            };
+
+        });
+
+        setShowColorModal(false);
+
+        setActiveColorAttribute(null);
+
+    };
+
+    /*
+    |--------------------------------------------------------------------------
+    | Remove Custom Color
+    |--------------------------------------------------------------------------
+    */
+
+    const handleRemoveColor = (
+
+        attributeName,
+
+        index
+
+    ) => {
+
+        setAttributeData((prev) => ({
+
+            ...prev,
+
+            [attributeName]:
+
+                (prev[attributeName] || []).filter(
+
+                    (_, i) => i !== index
+
+                ),
+
+        }));
+
+    };
+
+    /*
+    |--------------------------------------------------------------------------
+    | Variant Attribute Selection
+    |--------------------------------------------------------------------------
+    */
+
+    const handleVariantSelectionChange = (
 
         attributeName,
 
@@ -194,11 +568,19 @@ export default function Step2CategoryAttributes({
 
         setSelectedVariantValues((prev) => {
 
-            const selected = prev[attributeName] || [];
+            const selected =
+
+                prev[attributeName] || [];
 
             const updated = checked
+
                 ? [...selected, value]
-                : selected.filter((item) => item !== value);
+
+                : selected.filter(
+
+                    (item) => item !== value
+
+                );
 
             return {
 
@@ -212,28 +594,6 @@ export default function Step2CategoryAttributes({
 
     };
 
-    const handleVariantAttributeChange = (
-        attributeName,
-        value,
-        checked
-    ) => {
-
-        setSelectedVariantValues(prev => {
-
-            const selected = prev[attributeName] || [];
-
-            const updated = checked
-                ? [...selected, value]
-                : selected.filter(item => item !== value);
-
-            return {
-                ...prev,
-                [attributeName]: updated,
-            };
-
-        });
-
-    };
     /*
     |--------------------------------------------------------------------------
     | Save Step
@@ -251,22 +611,72 @@ export default function Step2CategoryAttributes({
             if (!selectedCategory) {
 
                 setErrors({
-                    category: ["Please select a category."]
+
+                    category: [
+
+                        "Please select a category.",
+
+                    ],
+
                 });
 
                 return;
 
             }
 
-            await saveCategoryAttributes({
+            const finalAttributeData = {
+
+                ...attributeData,
+
+            };
+
+            attributes.forEach((attribute) => {
+
+                if (
+
+                    attribute.attribute_type === "checkbox"
+
+                ) {
+
+                    finalAttributeData[attribute.attribute_name] =
+
+                        selectedVariantValues[attribute.attribute_name] || [];
+
+                }
+
+            });
+
+            const payload = {
 
                 product_id: productId,
 
                 category_id: selectedCategory.id,
 
-                attribute_data: attributeData,
+                attribute_data: finalAttributeData,
 
-            });
+            };
+
+            if (productId) {
+
+                await updateCategoryAttributes(
+
+                    productId,
+
+                    payload
+
+                );
+
+            }
+
+            else {
+
+                await saveCategoryAttributes(
+
+                    payload
+
+                );
+
+            }
 
             /*
             |--------------------------------------------------------------------------
@@ -275,29 +685,64 @@ export default function Step2CategoryAttributes({
             */
 
             const variantList = attributes
-                .filter(attribute =>
-                    attribute.attribute_type === "checkbox" ||
-                    attribute.attribute_type === "color"
-                )
-                .map(attribute => ({
 
-                    attribute_name: attribute.attribute_name,
+                .filter(
+
+                    (attribute) =>
+
+                        attribute.attribute_type === "checkbox" ||
+
+                        attribute.attribute_type === "color"
+
+                )
+
+                .map((attribute) => ({
+
+                    attribute_name:
+
+                        attribute.attribute_name,
 
                     values:
-                        selectedVariantValues[
-                        attribute.attribute_name
-                        ] || [],
+
+                        attribute.attribute_type === "color"
+
+                            ? (
+
+                                attributeData[
+                                attribute.attribute_name
+                                ] || []
+
+                            )
+
+                            : (
+
+                                selectedVariantValues[
+                                attribute.attribute_name
+                                ] || []
+
+                            ),
 
                 }))
-                .filter(attribute => attribute.values.length > 0);
+
+                .filter(
+
+                    (attribute) =>
+
+                        attribute.values.length > 0
+
+                );
 
             /*
             |--------------------------------------------------------------------------
-            | Save Variant Attributes to Parent
+            | Pass To Step 3
             |--------------------------------------------------------------------------
             */
 
-            setVariantAttributes(variantList);
+            setVariantAttributes(
+
+                variantList
+
+            );
 
             nextStep();
 
@@ -305,15 +750,29 @@ export default function Step2CategoryAttributes({
 
         catch (error) {
 
-            if (error.response?.status === 422) {
+            if (
 
-                setErrors(error.response.data.errors);
+                error.response?.status === 422
+
+            ) {
+
+                setErrors(
+
+                    error.response.data.errors
+
+                );
 
                 return;
 
             }
 
-            console.error(error);
+            console.error(
+
+                "Save category step failed:",
+
+                error
+
+            );
 
         }
 
@@ -331,9 +790,11 @@ export default function Step2CategoryAttributes({
     |--------------------------------------------------------------------------
     */
 
+
     return (
 
         <>
+
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
 
                 <FormHeading
@@ -362,7 +823,9 @@ export default function Step2CategoryAttributes({
                     </div>
 
                 )}
+
                 <div className="flex gap-3 mb-6 w-full">
+
                     {/* Category Tree */}
 
                     <CategoryTreeSelector
@@ -423,444 +886,48 @@ export default function Step2CategoryAttributes({
 
                             attributes.length > 0 && (
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <ProductAttributesRenderer
 
-                                    {
+                                    attributes={attributes}
 
-                                        attributes.map((attribute) => {
+                                    attributeData={attributeData}
 
-                                            switch (attribute.attribute_type) {
+                                    selectedVariantValues={selectedVariantValues}
 
-                                                /*
-                                                |--------------------------------------------------------------------------
-                                                | Dropdown
-                                                |--------------------------------------------------------------------------
-                                                */
+                                    handleAttributeChange={handleAttributeChange}
 
-                                                case "dropdown":
+                                    handleVariantSelectionChange={handleVariantSelectionChange}
 
-                                                    return (
+                                    setShowColorModal={setShowColorModal}
 
-                                                        <div key={attribute.id}>
+                                    setActiveColorAttribute={setActiveColorAttribute}
 
-                                                            <label className="block mb-2 font-medium">
+                                    handleRemoveColor={handleRemoveColor}
 
-                                                                {attribute.attribute_name}
-
-                                                            </label>
-
-                                                            <select
-
-                                                                className="w-full border rounded-lg px-4 py-3"
-
-                                                                value={
-                                                                    attributeData[
-                                                                    attribute.attribute_name
-                                                                    ] || ""
-                                                                }
-
-                                                                onChange={(e) =>
-                                                                    handleAttributeChange(
-                                                                        attribute.attribute_name,
-                                                                        e.target.value
-                                                                    )
-                                                                }
-
-                                                            >
-
-                                                                <option value="">
-                                                                    Select
-                                                                </option>
-
-                                                                {
-
-                                                                    attribute.attribute_values.map((item) => (
-
-                                                                        <option
-                                                                            key={item}
-                                                                            value={item}
-                                                                        >
-
-                                                                            {item}
-
-                                                                        </option>
-
-                                                                    ))
-
-                                                                }
-
-                                                            </select>
-
-                                                        </div>
-
-                                                    );
-
-                                                /*
-                                                |--------------------------------------------------------------------------
-                                                | Checkbox (Variant Attribute)
-                                                |--------------------------------------------------------------------------
-                                                */
-
-                                                case "checkbox":
-
-                                                    return (
-
-                                                        <div key={attribute.id}>
-
-                                                            <label className="block mb-3 font-medium">
-
-                                                                {attribute.attribute_name}
-
-                                                            </label>
-
-                                                            <div className="space-y-2">
-
-                                                                {
-
-                                                                    attribute.attribute_values.map((item) => (
-
-                                                                        <label
-
-                                                                            key={item}
-
-                                                                            className="flex items-center gap-3 cursor-pointer"
-
-                                                                        >
-
-                                                                            <input
-
-                                                                                type="checkbox"
-
-                                                                                checked={
-                                                                                    selectedVariantValues[
-                                                                                        attribute.attribute_name
-                                                                                    ]?.includes(item) || false
-                                                                                }
-
-                                                                                onChange={(e) =>
-                                                                                    handleVariantAttributeChange(
-                                                                                        attribute.attribute_name,
-                                                                                        item,
-                                                                                        e.target.checked
-                                                                                    )
-                                                                                }
-
-                                                                                className="w-4 h-4"
-
-                                                                            />
-
-                                                                            <span>
-
-                                                                                {item}
-
-                                                                            </span>
-
-                                                                        </label>
-
-                                                                    ))
-
-                                                                }
-
-                                                            </div>
-
-                                                        </div>
-
-                                                    );
-
-                                                /*
-                                                |--------------------------------------------------------------------------
-                                                | Text
-                                                |--------------------------------------------------------------------------
-                                                */
-
-                                                case "text":
-
-                                                    return (
-
-                                                        <div key={attribute.id}>
-
-                                                            <label className="block mb-2 font-medium">
-
-                                                                {attribute.attribute_name}
-
-                                                            </label>
-
-                                                            <input
-
-                                                                type="text"
-
-                                                                className="w-full border rounded-lg px-4 py-3"
-
-                                                                value={
-                                                                    attributeData[
-                                                                    attribute.attribute_name
-                                                                    ] || ""
-                                                                }
-
-                                                                onChange={(e) =>
-                                                                    handleAttributeChange(
-                                                                        attribute.attribute_name,
-                                                                        e.target.value
-                                                                    )
-                                                                }
-
-                                                            />
-
-                                                        </div>
-
-                                                    );
-
-                                                /*
-                                                |--------------------------------------------------------------------------
-                                                | Number
-                                                |--------------------------------------------------------------------------
-                                                */
-
-                                                case "number":
-
-                                                    return (
-
-                                                        <div key={attribute.id}>
-
-                                                            <label className="block mb-2 font-medium">
-
-                                                                {attribute.attribute_name}
-
-                                                            </label>
-
-                                                            <input
-
-                                                                type="number"
-
-                                                                className="w-full border rounded-lg px-4 py-3"
-
-                                                                value={
-                                                                    attributeData[
-                                                                    attribute.attribute_name
-                                                                    ] || ""
-                                                                }
-
-                                                                onChange={(e) =>
-                                                                    handleAttributeChange(
-                                                                        attribute.attribute_name,
-                                                                        e.target.value
-                                                                    )
-                                                                }
-
-                                                            />
-
-                                                        </div>
-
-                                                    );
-
-                                                /*
-                                                |--------------------------------------------------------------------------
-                                                | Boolean
-                                                |--------------------------------------------------------------------------
-                                                */
-
-                                                case "boolean":
-
-                                                    return (
-
-                                                        <div key={attribute.id}>
-
-                                                            <label className="block mb-3 font-medium">
-
-                                                                {attribute.attribute_name}
-
-                                                            </label>
-
-                                                            <select
-
-                                                                className="w-full border rounded-lg px-4 py-3"
-
-                                                                value={
-                                                                    attributeData[
-                                                                    attribute.attribute_name
-                                                                    ] ?? ""
-                                                                }
-
-                                                                onChange={(e) =>
-                                                                    handleAttributeChange(
-                                                                        attribute.attribute_name,
-                                                                        e.target.value
-                                                                    )
-                                                                }
-
-                                                            >
-
-                                                                <option value="">
-                                                                    Select
-                                                                </option>
-
-                                                                <option value="1">
-                                                                    Yes
-                                                                </option>
-
-                                                                <option value="0">
-                                                                    No
-                                                                </option>
-
-                                                            </select>
-
-                                                        </div>
-
-                                                    );
-
-                                                /*
-                                                |--------------------------------------------------------------------------
-                                                | Date
-                                                |--------------------------------------------------------------------------
-                                                */
-
-                                                case "date":
-
-                                                    return (
-
-                                                        <div key={attribute.id}>
-
-                                                            <label className="block mb-2 font-medium">
-
-                                                                {attribute.attribute_name}
-
-                                                            </label>
-
-                                                            <input
-
-                                                                type="date"
-
-                                                                className="w-full border rounded-lg px-4 py-3"
-
-                                                                value={
-                                                                    attributeData[
-                                                                    attribute.attribute_name
-                                                                    ] || ""
-                                                                }
-
-                                                                onChange={(e) =>
-                                                                    handleAttributeChange(
-                                                                        attribute.attribute_name,
-                                                                        e.target.value
-                                                                    )
-                                                                }
-
-                                                            />
-
-                                                        </div>
-
-                                                    );
-
-                                                /*
-                                                |--------------------------------------------------------------------------
-                                                | Color
-                                                |--------------------------------------------------------------------------
-                                                */
-
-                                                case "color":
-
-                                                    return (
-
-                                                        <div key={attribute.id}>
-
-                                                            <label className="block mb-3 font-medium">
-
-                                                                {attribute.attribute_name}
-
-                                                            </label>
-
-                                                            <div className="flex flex-wrap gap-3">
-
-                                                                {
-
-                                                                    attribute.attribute_values.map((color) => {
-
-                                                                        const selected =
-                                                                            selectedVariantValues[
-                                                                                attribute.attribute_name
-                                                                            ]?.includes(color);
-
-                                                                        return (
-
-                                                                            <label
-                                                                                key={color}
-                                                                                className="cursor-pointer"
-                                                                            >
-
-                                                                                <input
-
-                                                                                    type="checkbox"
-
-                                                                                    className="hidden"
-
-                                                                                    checked={selected || false}
-
-                                                                                    onChange={(e) =>
-                                                                                        handleVariantAttributeChange(
-
-                                                                                            attribute.attribute_name,
-
-                                                                                            color,
-
-                                                                                            e.target.checked
-
-                                                                                        )
-                                                                                    }
-
-                                                                                />
-
-                                                                                <div
-
-                                                                                    className={`
-                                        w-10
-                                        h-10
-                                        rounded-full
-                                        border-4
-                                        transition
-                                        duration-200
-                                        ${selected
-                                                                                            ? "border-primary scale-110"
-                                                                                            : "border-slate-300"
-                                                                                        }
-                                    `}
-
-                                                                                    style={{
-                                                                                        backgroundColor: color.toLowerCase(),
-                                                                                    }}
-
-                                                                                />
-
-                                                                            </label>
-
-                                                                        );
-
-                                                                    })
-
-                                                                }
-
-                                                            </div>
-
-                                                        </div>
-
-                                                    );
-
-                                                default:
-
-                                                    return null;
-
-                                            }
-
-                                        })
-
-                                    }
-
-                                </div>
+                                />
 
                             )
 
                         }
 
+                        <AddColorModal
+
+                            show={showColorModal}
+
+                            onClose={() => {
+
+                                setShowColorModal(false);
+
+                                setActiveColorAttribute(null);
+
+                            }}
+
+                            onSave={handleAddColor}
+
+                        />
+
                     </div>
+
                 </div>
 
             </div>
@@ -905,5 +972,4 @@ export default function Step2CategoryAttributes({
         </>
 
     );
-
 }

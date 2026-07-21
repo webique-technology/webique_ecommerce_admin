@@ -8,7 +8,9 @@ import Button, {
     SelectField,
 } from "../../../components/ui/FormFields";
 
-import { createProduct } from "../../../services/productService";
+import { useEffect } from "react";
+
+import { createProduct, getProduct, updateBasicProduct } from "../../../services/productService";
 
 export default function Step1Basic({
 
@@ -24,6 +26,7 @@ export default function Step1Basic({
     const navigate = useNavigate();
 
     const [loading, setLoading] = useState(false);
+    const [fetching, setFetching] = useState(false);
     const [errors, setErrors] = useState({});
 
     const [formData, setFormData] = useState({
@@ -42,6 +45,39 @@ export default function Step1Basic({
 
     });
 
+    useEffect(() => {
+        if (productId) {
+            const fetchProduct = async () => {
+                setFetching(true);
+                try {
+                    const response = await getProduct(productId);
+                    const product = response.data?.data || response.data;
+
+                    setFormData({
+                        name: product.name || "",
+                        product_type: product.product_type || "",
+                        brand: product.brand || "",
+                        sku: product.sku || "",
+                        short_description: product.short_description || "",
+                        description: product.description || "",
+                    });
+
+                    // Sync local parent state
+                    if (product.product_type) {
+                        setProductType(product.product_type);
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch product details:", error);
+                    alert("Error loading product details.");
+                } finally {
+                    setFetching(false);
+                }
+            };
+
+            fetchProduct();
+        }
+    }, [productId, setProductType]);
+
     const handleChange = (e) => {
 
         const { name, value } = e.target;
@@ -50,6 +86,9 @@ export default function Step1Basic({
             ...prev,
             [name]: value,
         }));
+        if (name === "product_type") {
+            setProductType(value);
+        }
 
     };
     const handleSubmit = async (e) => {
@@ -61,14 +100,29 @@ export default function Step1Basic({
         setErrors({});
 
         try {
+            let response;
+            // const response = await createProduct(formData);
+            if (productId) {
+                // Edit Mode: Update Basic Product API
+                response = await updateBasicProduct(productId, formData);
+            } else {
+                // Create Mode: Store Basic Product API
+                response = await createProduct(formData);
+            }
 
-            const response = await createProduct(formData);
-
+            const savedData = response.data?.data || response.data;
+            // Save Product ID and Type to Parent State
+            if (savedData?.id) {
+                setProductId(savedData.id);
+            }
+            if (savedData?.product_type) {
+                setProductType(savedData.product_type);
+            }
             // Save Product ID
-            setProductId(response.data.data.id);
+            // setProductId(response.data.data.id);
 
             // Save Product Type
-            setProductType(response.data.data.product_type);
+            // setProductType(response.data.data.product_type);
 
             nextStep();
 
