@@ -73,7 +73,7 @@ export default function ProductForm() {
         <Step2CategoryAttributes
 
           productId={productId}
-
+          isEdit={isEdit}
           nextStep={nextStep}
 
           previousStep={previousStep}
@@ -88,6 +88,7 @@ export default function ProductForm() {
           productId={productId}
           previousStep={() => setStep(2)}
           nextStep={() => setStep(4)}
+          isEdit={isEdit}
         />
       ) : (
         (step === 3) && (
@@ -96,6 +97,7 @@ export default function ProductForm() {
             attributes={variantAttributes}
             previousStep={() => setStep(2)}
             nextStep={() => setStep(4)}
+            isEdit={isEdit}
           />
         )
       )}
@@ -123,7 +125,7 @@ export default function ProductForm() {
         <Step4PublishSeo
 
           productId={productId}
-
+          isEdit={isEdit}
           previousStep={previousStep}
 
         />

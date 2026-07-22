@@ -199,6 +199,7 @@ import {
 export default function Step2CategoryAttributes({
 
     productId,
+    isEdit = false,
     previousStep,
     nextStep,
     setVariantAttributes,
@@ -656,7 +657,7 @@ export default function Step2CategoryAttributes({
 
             };
 
-            if (productId) {
+            if (productId && isEdit) {
 
                 await updateCategoryAttributes(
 

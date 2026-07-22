@@ -1,133 +1,129 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Button, {
-
     CheckboxField,
     FormHeading,
     InputFields,
     TextareaFields,
-
 } from "../../../components/ui/FormFields";
-import { publishProduct } from "../../../services/productService";
+import {
+    publishProduct,
+    updatePublishProduct,
+    getProduct,
+} from "../../../services/productService";
 
 export default function Step4PublishSeo({
     productId,
     previousStep,
     isEdit = false,
-
 }) {
-
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
     const [formData, setFormData] = useState({
-
         status: true,
         featured: false,
         meta_title: "",
         meta_description: "",
         meta_keywords: "",
         canonical_url: "",
-
     });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Fetch Saved Product SEO & Publish Details (Edit Mode)
+    |--------------------------------------------------------------------------
+    */
+    useEffect(() => {
+        if (productId) {
+            const fetchProductSeoDetails = async () => {
+                try {
+                    const response = await getProduct(productId);
+                    const productData = response.data?.data || response.data;
+
+                    if (productData) {
+                        const seoData = productData.seo || {};
+
+                        setFormData({
+                            status: productData.status ?? true,
+                            featured: productData.featured ?? false,
+                            meta_title: seoData.meta_title || "",
+                            meta_description: seoData.meta_description || "",
+                            meta_keywords: seoData.meta_keywords || "",
+                            canonical_url: seoData.canonical_url || "",
+                        });
+                    }
+                } catch (error) {
+                    console.error("Failed to load product SEO details:", error);
+                }
+            };
+
+            fetchProductSeoDetails();
+        }
+    }, [productId]);
 
     const handleCheckbox = (e) => {
         const { name, checked } = e.target;
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
-
             [name]: checked,
-
         }));
-
     };
 
     const handleInput = (e) => {
-
         const { name, value } = e.target;
-
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
             [name]: value,
         }));
-
     };
 
     const handleSubmit = async () => {
-
         try {
-
             setLoading(true);
-
             setErrors({});
 
             const payload = {
-
                 product_id: productId,
-
                 status: formData.status,
-
                 featured: formData.featured,
-
                 meta_title: formData.meta_title,
-
                 meta_description: formData.meta_description,
-
                 meta_keywords: formData.meta_keywords,
-
                 canonical_url: formData.canonical_url,
-
             };
 
-            const response = await publishProduct(payload);
+            let response;
+            if (productId && isEdit) {
+                response = await updatePublishProduct(productId, payload);
+            } else {
+                response = await publishProduct(payload);
+            }
 
             console.log(response.data);
 
             navigate("/products");
-
-        }
-
-        catch (error) {
-
+        } catch (error) {
             if (error.response?.status === 422) {
-
-                setErrors(
-                    error.response.data.errors
-                );
-
+                setErrors(error.response.data.errors);
                 return;
-
             }
 
             console.error(error);
 
             alert(
-
-                error.response?.data?.message ||
-
-                "Something went wrong."
-
+                error.response?.data?.message || "Something went wrong."
             );
-
-        }
-
-        finally {
-
+        } finally {
             setLoading(false);
-
         }
-
     };
 
     return (
-
         <div className="space-y-6">
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-                <FormHeading
-                    icon="publish"
-                    title="Publish Settings"
-                />
+                <FormHeading icon="publish" title="Publish Settings" />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <CheckboxField
@@ -143,23 +139,19 @@ export default function Step4PublishSeo({
                         checked={formData.featured}
                         onChange={handleCheckbox}
                     />
-
                 </div>
-
             </div>
             {/* ===========================================
                 SEO Settings
             =========================================== */}
 
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-
                 <FormHeading
                     icon="travel_explore"
                     title="SEO Settings"
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-
                     <InputFields
                         label="Meta Title"
                         name="meta_title"
@@ -183,11 +175,9 @@ export default function Step4PublishSeo({
                         error={errors.canonical_url?.[0]}
                         errorClass="text-red-500 text-sm mt-1 block"
                     />
-
                 </div>
 
                 <div className="mt-5">
-
                     <TextareaFields
                         label="Meta Description"
                         name="meta_description"
@@ -200,11 +190,9 @@ export default function Step4PublishSeo({
                         error={errors.meta_description?.[0]}
                         errorClass="text-red-500 text-sm mt-1 block"
                     />
-
                 </div>
 
                 <div className="mt-5">
-
                     <InputFields
                         label="Meta Keywords"
                         name="meta_keywords"
@@ -218,20 +206,15 @@ export default function Step4PublishSeo({
                     />
 
                     <p className="text-xs text-slate-500 mt-2">
-
                         Separate keywords using commas.
-
                     </p>
-
                 </div>
-
             </div>
             {/* ===========================================
                 Footer
             =========================================== */}
 
             <div className="flex justify-between">
-
                 <Button
                     type="button"
                     label="Back"
@@ -254,7 +237,7 @@ export default function Step4PublishSeo({
                         label={
                             loading
                                 ? "Publishing..."
-                                : isEdit
+                                : isEdit || productId
                                     ? "Update Product"
                                     : "Publish Product"
                         }
@@ -263,5 +246,4 @@ export default function Step4PublishSeo({
             </div>
         </div>
     );
-
 }

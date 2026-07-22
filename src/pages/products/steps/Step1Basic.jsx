@@ -14,7 +14,7 @@ import { createProduct, getProduct, updateBasicProduct } from "../../../services
 
 export default function Step1Basic({
 
-    isEdit,
+    isEdit = false,
     productId,
     setProductId,
     productType,
@@ -102,7 +102,7 @@ export default function Step1Basic({
         try {
             let response;
             // const response = await createProduct(formData);
-            if (productId) {
+            if (productId && isEdit) {
                 // Edit Mode: Update Basic Product API
                 response = await updateBasicProduct(productId, formData);
             } else {

@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 
 import TableToolbar from "../../components/common/TableToolbar";
 import Pagination from "../../components/common/Pagination";
 import StatusBadge from "../../components/common/StatusBadge";
 import StatusToggle from "../../components/common/StatusToggle";
 import TableActions from "../../components/common/TableActions";
+import { deleteProduct } from "../../services/productService";
 
 export default function ProductTable({
 
@@ -46,6 +47,62 @@ export default function ProductTable({
     onPageChange,
 
 }) {
+    const [deletingId, setDeletingId] = useState(null);
+
+    /*
+    |--------------------------------------------------------------------------
+    | View Handler (Receives Product ID or Object)
+    |--------------------------------------------------------------------------
+    */
+    const handleViewProduct = (productIdOrObject) => {
+        if (typeof onView === "function") {
+            onView(productIdOrObject);
+        }
+    };
+
+    /*
+    |--------------------------------------------------------------------------
+    | Edit Handler (Receives Product ID)
+    |--------------------------------------------------------------------------
+    */
+    const handleEditProduct = (id) => {
+        if (typeof onEdit === "function") {
+            onEdit(id);
+        }
+    };
+
+    /*
+    |--------------------------------------------------------------------------
+    | Delete Handler (Receives Full Product Row)
+    |--------------------------------------------------------------------------
+    */
+    const handleDeleteProduct = async (product) => {
+        if (typeof onDelete === "function") {
+            onDelete(product);
+            return;
+        }
+
+        const confirmDelete = window.confirm(
+            `Are you sure you want to delete "${product.name}"? This action cannot be undone.`
+        );
+
+        if (!confirmDelete) return;
+
+        try {
+            setDeletingId(product.id);
+            await deleteProduct(product.id);
+            if (typeof onRefresh === "function") {
+                onRefresh();
+            }
+        } catch (error) {
+            console.error("Failed to delete product:", error);
+            alert(
+                error.response?.data?.message || "Failed to delete product."
+            );
+        } finally {
+            setDeletingId(null);
+        }
+    };
 
     const filters = [
 
@@ -115,31 +172,31 @@ export default function ProductTable({
 
         },
 
-        {
+        // {
 
-            key: "featured",
+        //     key: "featured",
 
-            value: featuredFilter,
+        //     value: featuredFilter,
 
-            onChange: onFeaturedFilterChange,
+        //     onChange: onFeaturedFilterChange,
 
-            placeholder: "Featured",
+        //     placeholder: "Featured",
 
-            options: [
+        //     options: [
 
-                {
-                    value: "1",
-                    label: "Featured",
-                },
+        //         {
+        //             value: "1",
+        //             label: "Featured",
+        //         },
 
-                {
-                    value: "0",
-                    label: "Not Featured",
-                },
+        //         {
+        //             value: "0",
+        //             label: "Not Featured",
+        //         },
 
-            ],
+        //     ],
 
-        },
+        // },
 
     ];
 
@@ -200,9 +257,9 @@ export default function ProductTable({
                                     Stock
                                 </th>
 
-                                <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-slate-600">
+                                {/* <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-slate-600">
                                     Featured
-                                </th>
+                                </th> */}
 
                                 <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-slate-600">
                                     Status
@@ -245,7 +302,7 @@ export default function ProductTable({
 
                                     <tr
                                         key={product.id}
-                                        className="hover:bg-slate-50 transition"
+                                        className={`hover:bg-slate-50 transition ${deletingId === product.id ? "opacity-50 pointer-events-none" : ""}`}
                                     >
 
                                         {/* Image */}
@@ -343,7 +400,7 @@ export default function ProductTable({
 
                                         {/* Featured */}
 
-                                        <td className="px-5 py-4 text-center">
+                                        {/* <td className="px-5 py-4 text-center">
 
                                             <StatusBadge
                                                 status={product.featured}
@@ -351,7 +408,7 @@ export default function ProductTable({
                                                 inactiveText="No"
                                             />
 
-                                        </td>
+                                        </td> */}
 
                                         {/* Status */}
 
@@ -372,9 +429,9 @@ export default function ProductTable({
 
                                             <TableActions
                                                 row={product}
-                                                onView={onView}
-                                                onEdit={onEdit}
-                                                onDelete={onDelete}
+                                                onView={handleViewProduct}
+                                                onEdit={handleEditProduct}
+                                                onDelete={handleDeleteProduct}
                                             />
 
                                         </td>

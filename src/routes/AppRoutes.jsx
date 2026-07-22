@@ -16,6 +16,7 @@ import Dashboard from "../pages/dashboard/Dashboard";
 // Modules
 import Products from "../pages/products/Products";
 import ProductForm from "../pages/products/ProductForm";
+import ViewProduct from "../pages/products/ViewProduct";
 
 import Categories from "../pages/categories/Categories";
 import CategoryForm from "../pages/categories/CategoryForm";
@@ -87,6 +88,10 @@ export default function AppRoutes() {
           <Route
             path="/products/edit/:id"
             element={<ProductForm />}
+          />
+          <Route
+            path="/products/view/:id"
+            element={<ViewProduct />}
           />
 
           {/* Orders */}

@@ -50,8 +50,20 @@ export const saveCategoryAttributes = (data) => {
 |--------------------------------------------------------------------------
 */
 
+// export const saveSimpleProduct = (data) => {
+//     return API.post(`${BASE_URL}/save-simple-product`, data);
+// };
+
 export const saveSimpleProduct = (data) => {
-    return API.post(`${BASE_URL}/save-simple-product`, data);
+    return API.post(
+        `${BASE_URL}/save-simple-product`,
+        data,
+        {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        }
+    );
 };
 
 /*
@@ -111,8 +123,19 @@ export const updateCategoryAttributes = (id, data) => {
 |--------------------------------------------------------------------------
 */
 
+// export const updateSimpleProduct = (id, data) => {
+//     return API.post(`${BASE_URL}/update-simple-product/${id}`, data);
+// };
 export const updateSimpleProduct = (id, data) => {
-    return API.post(`${BASE_URL}/update-simple-product/${id}`, data);
+    return API.post(
+        `${BASE_URL}/update-simple-product/${id}`,
+        data,
+        {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        }
+    );
 };
 
 /*
