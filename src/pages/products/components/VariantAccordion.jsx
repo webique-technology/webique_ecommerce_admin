@@ -425,16 +425,11 @@ export default function VariantAccordion({
                                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-5">
                                         {
                                             variant.images.map((image, imageIndex) => (
-                                                <div
-                                                    key={imageIndex}
-                                                    className="relative group"
-                                                >
-                                                    <img
-                                                        src={image.preview}
-                                                        alt="Variant"
-                                                        className="w-full h-36 object-cover rounded-lg border"
-                                                    />
-
+                                                <div key={imageIndex} className="relative group" >
+                                                    {image.preview !== undefined
+                                                        ? (<img src={image.preview} alt="Variant" className="w-full h-36 object-cover rounded-lg border" />)
+                                                        : (<img src={image.image} alt="Variant" className="w-full h-36 object-cover rounded-lg border" />)
+                                                    }
                                                     {
                                                         imageIndex === 0 && (
                                                             <span className="absolute left-2 top-2 bg-primary text-white text-xs px-2 py-1 rounded">
@@ -442,7 +437,6 @@ export default function VariantAccordion({
                                                             </span>
                                                         )
                                                     }
-
                                                     <button
                                                         type="button"
                                                         onClick={() => removeImage(imageIndex)}

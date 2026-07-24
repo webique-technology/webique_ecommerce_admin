@@ -28,7 +28,7 @@ export default function ViewProduct() {
             setProduct(data);
 
             if (data.images?.length > 0) {
-                setSelectedImage(data.images[0]);
+                setSelectedImage(data.images[0].image);
             }
         } catch (error) {
             console.error(error);
@@ -93,7 +93,7 @@ export default function ViewProduct() {
                                     {product.images.map((image, index) => (
                                         <div
                                             key={index}
-                                            onClick={() => setSelectedImage(image)}
+                                            onClick={() => setSelectedImage(image.image)}
                                             className={`
                                                 w-20
                                                 h-20
@@ -109,7 +109,7 @@ export default function ViewProduct() {
                                             `}
                                         >
                                             <img
-                                                src={image}
+                                                src={image.image}
                                                 alt={`Product ${index + 1}`}
                                                 className="w-full h-full object-cover"
                                             />

@@ -144,10 +144,21 @@ export const updateSimpleProduct = (id, data) => {
 |--------------------------------------------------------------------------
 */
 
-export const updateVariableProduct = (id, data) => {
-    return API.post(`${BASE_URL}/update-variable-product/${id}`, data);
-};
+// export const updateVariableProduct = (id, data) => {
+//     return API.post(`${BASE_URL}/update-variable-product/${id}`, data);
+// };
 
+export const updateVariableProduct = (id, data) => {
+    return API.post(
+        `${BASE_URL}/update-variable-product/${id}`,
+        data,
+        {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        }
+    );
+};
 /*
 |--------------------------------------------------------------------------
 | Update - Publish
